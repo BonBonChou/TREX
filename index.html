@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>暴龍</title>
+  <title>暴龍紀元：生存之路</title>
   <style>
     body {
       font-family: 'Noto Sans TC', sans-serif;
@@ -56,7 +56,7 @@
     }
     h4 {
       font-size: 1.4em;
-      line-height: 1.6;
+      line-height: 0.25;
 
       margin-bottom: 1em;
       color: #9a42ff;
@@ -156,17 +156,18 @@
 <body>
 <div class="container">
   <div id="start-screen">
-    <h1>🦖暴龍</h1>
-    <h4>在無光之地，尋找宇宙的答案！</h4>
+    <h1>🦖暴龍紀元：生存之路</h1>
+    <h4>自蛋殼中誕生、歷經掠食與競爭</h4>
+    <h4>踏上統治的終極旅程！</h4>
     <div class="intro">
-      <h5>擁有最強的咬合力、最酷的名稱，見證了恐龍時代的末日，在其統治巔峰的時期滅絕——立體劇場電影《暴龍》的內容化為這款小遊戲，邀請你一起走過理論與觀測的歷程，破解黑洞相關的宇宙謎團。</h5>
-      <h5>一同見證人類如何一步步逼近宇宙的真相！</h5>
+      <h5>擁有最強的咬合力、最酷的名稱，見證了恐龍時代的末日，在其統治巔峰的時期滅絕——立體劇場電影《暴龍》的內容化為這款小遊戲，邀請你一起扮演稱霸一時的遠古掠食者。從幼年到老年，一步步踏上壯烈而充滿變數的一生——</h5>
+      <h5>寫下屬於暴龍的傳奇！</h5>
       <h3>🔍 遊戲說明</h3>
-      <p>🌌 <strong>背景故事</strong><br>你是宇宙調查局的特派調查員，任務是破解與黑洞相關的 8 大宇宙謎團。每一關都是通往真相的一步，準備好進入任務了嗎？</p>
-      <p>🧠 <strong>玩法簡介</strong><br>遊戲總共 8 關。每關只有一個正確答案，答對得分。</p>
-      <p>🏆 <strong>目標與結局</strong><br>遊戲結束後，將根據你的總分給予不同的評語與稱號。你能成功破解所有謎團，成為宇宙奧秘大師嗎？</p>
+      <p>🌌 <strong>背景故事</strong><br>你將成為一隻暴龍，從幼年一路進化，歷經掠食、社交、爭地盤與老年風險，每一步都會改變你的命運。</p>
+      <p>🧠 <strong>玩法簡介</strong><br>分配你的初始能力點數，根據每階段的選擇與事件變化影響你的最終結果。每次遊戲可能導致截然不同的結局──</p>
+      <p>🏆 <strong>目標與結局</strong><br>遊戲結束後，將根據你的各項能力值給予不同的評語與稱號。你能活到老年？稱霸地獄溪層？還是早早變成食物？</p>
     </div>
-    <button onclick="startGame()">開始遊戲</button>
+    <button onclick="startGame()">開始「龍」生</button>
   </div>
   <!-- 問題頁 -->
   <div id="question-screen" class="hidden">
@@ -235,7 +236,12 @@
 
     function startGame() {
       document.getElementById("start-screen").classList.add("hidden");
-      showQuestion();
+      goToPointPage();
+    }
+    
+    function goToPointPage() {
+      document.getElementById("start-screen").classList.add("hidden");
+      document.getElementById("point-allocation-screen").classList.remove("hidden");
     }
 
     function showQuestion() {
