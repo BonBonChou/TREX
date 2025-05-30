@@ -7,7 +7,8 @@
   <style>
     body {
       font-family: 'Noto Sans TC', sans-serif;
-      background: linear-gradient(to right, #211430, #210f36, #110221);
+      /*background: linear-gradient(to right, #211430, #210f36, #110221);*/
+      background: transparent;
       color: #fff;
       text-align: center;
       padding: 2em;
@@ -56,8 +57,7 @@
     }
     h4 {
       font-size: 1.4em;
-      line-height: 0.25;
-
+      line-height: 1.6;
       margin-bottom: 1em;
       color: #9a42ff;
     }
@@ -76,6 +76,24 @@
       border-radius: 10px;
     }
     
+    .param-group {
+      margin: 1em 0;
+      text-align: middle;
+    }
+
+    .param-group label {
+      font-weight: bold;
+      display: inline-block;
+      width: 180px;
+    }
+
+    .param-group input {
+      width: 60px;
+      padding: 0.3em;
+      font-size: 1em;
+      
+    }
+    
     #question-title {
       font-size: *2em;  /* 你可以依需求調整數值 */
       font-weight: bold; /* 也可以設為 normal, lighter 等 */
@@ -87,6 +105,30 @@
       line-height: 1.6;
       margin-bottom: 1em;
     }
+    
+    .selected-option {
+      background-color: green; /*#ff9933;*/
+      color: white;
+      font-weight: bold;
+    }
+
+    .option-hint {
+      margin-top: 0.3em;
+      font-size: 1.4em;
+      color: #00ffcc;
+      opacity: 0;
+      transition: opacity 1s ease;
+    }
+
+    .option-hint.fade-in {
+      opacity: 1;
+    }
+
+    .option-hint.fade-out {
+      opacity: 0;
+    }
+
+    
     #feedback-title {
       font-size: 2em;  /* 你可以依需求調整數值 */
       font-weight: bold; /* 也可以設為 normal, lighter 等 */
@@ -150,6 +192,11 @@
       50% { background-position: 0% 50%; }
       100% { background-position: 100% 50%; }
     }
+    
+    button:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
   </style>
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC&display=swap" rel="stylesheet">
 </head>
@@ -157,39 +204,71 @@
 <div class="container">
   <div id="start-screen">
     <h1>🦖暴龍紀元：生存之路</h1>
-    <h4>自蛋殼中誕生、歷經掠食與競爭</h4>
-    <h4>踏上統治的終極旅程！</h4>
+    <h4>自蛋殼中誕生、歷經掠食與競爭<br>踏上統治的終極旅程！</h4>
     <div class="intro">
       <h5>擁有最強的咬合力、最酷的名稱，見證了恐龍時代的末日，在其統治巔峰的時期滅絕——立體劇場電影《暴龍》的內容化為這款小遊戲，邀請你一起扮演稱霸一時的遠古掠食者。從幼年到老年，一步步踏上壯烈而充滿變數的一生——</h5>
       <h5>寫下屬於暴龍的傳奇！</h5>
       <h3>🔍 遊戲說明</h3>
       <p>🌌 <strong>背景故事</strong><br>你將成為一隻暴龍，從幼年一路進化，歷經掠食、社交、爭地盤與老年風險，每一步都會改變你的命運。</p>
-      <p>🧠 <strong>玩法簡介</strong><br>分配你的初始能力點數，根據每階段的選擇與事件變化影響你的最終結果。每次遊戲可能導致截然不同的結局──</p>
+      <p>🧠 <strong>玩法簡介</strong><br>分配你的初始能力點數，根據每階段的選擇（部分選項須能力達到一定值才能選擇）與事件變化影響你的最終結果。每次遊戲可能導致截然不同的結局。</p>
       <p>🏆 <strong>目標與結局</strong><br>遊戲結束後，將根據你的各項能力值給予不同的評語與稱號。你能活到老年？稱霸地獄溪層？還是早早變成食物？</p>
     </div>
     <button onclick="startGame()">開始「龍」生</button>
   </div>
+  <!-- 點數頁 -->
+  <div id="point-allocation-screen" class="hidden">
+    <h2>能力分配</h2>
+    
+    <!-- 固定參數 -->
+    <div>
+      <p>🧠 智力：<strong>50</strong></p>
+      <p>🎂 成長速度：<strong>70</strong></p>
+      <p>🍗 食物儲備：<strong>100</strong></p>
+    </div>
+
+    <!-- 可分配參數 -->
+    <p>你有 <strong id="remaining-points">100</strong> 點能力點數<br>請分配給以下屬性：</p>
+    <div class="param-group">
+      <label for="safety">🛡 安全敏感</label>
+      <input type="number" id="safety" min="0" max="100" value="0" oninput="updatePoints()" title="避免危險與逃脫能力">
+    </div>
+    <div class="param-group">
+      <label for="combat">💪 戰鬥能力</label>
+      <input type="number" id="combat" min="0" max="100" value="0" oninput="updatePoints()" title="對抗敵人與競爭對手的能力">
+    </div>
+    <div class="param-group">
+      <label for="independence">🧬 獨立性</label>
+      <input type="number" id="independence" min="0" max="100" value="0" oninput="updatePoints()" title="社會互動傾向與建立領地能力">
+    </div>
+    <div class="param-group">
+      <label for="sense">👃 感官靈敏</label>
+      <input type="number" id="sense" min="0" max="100" value="0" oninput="updatePoints()" title="嗅覺與視覺，找食物與躲危機的能力">
+    </div>
+
+    <p style="color: red;" id="point-warning" class="hidden">點數總和不可超過 100！</p>
+
+    <button id="start-btn" onclick="confirmPoints()" disabled>確定</button>
+  </div>
+
   <!-- 問題頁 -->
   <div id="question-screen" class="hidden">
     <h2 id="question-title"></h2>
-    <div class="intro">
-
-      <p style="text-align: justify;" id="question-text"></p>
-    </div>
+    <p style="text-align: justify;" id="question-text"></p>
     <div id="options-container"></div>
+    <div id="EffectText" class="option-hint hidden"></div>
   </div>
-
-  <div class="hidden" id="feedback-screen">
-    <h3 id="feedback-title"></h3>
-    <p id="feedback-text"></p>
-    <button onclick="showKnowledge()">查看解析</button>
-  </div>
-
+  <!-- 知識頁 -->
   <div class="hidden" id="knowledge-screen">
     <h3 id="knowledge-title">知識補充</h3>
     <p id="knowledge-text"></p>
-    <button onclick="nextQuestion()">下一關</button>
+    <button onclick="showFeedback()">下一頁</button>
   </div>
+  <!-- 回饋頁 -->
+  <div class="hidden" id="feedback-screen">
+    <h3 id="feedback-title"></h3>
+    <p id="feedback-text"></p>
+    <button onclick="nextQuestion()">下一頁</button>
+  </div> 
   <!-- 結算頁 -->
   <div class="hidden" id="result-screen">
     <h2>🌟 任務結束！</h2>
@@ -209,29 +288,148 @@
   </div>
 </div>
   <script>
-    const questions = [
+    const babyQuestionPool = [
       {
-        title: "第 1 關：重力的第一步",
-        intro: `
-          <h3>🔎 任務簡報</h3>
-          <p>一艘太空探測器靠近一顆陌生行星時出現了奇怪的現象，我們從太空站收到這些紀錄，請幫忙判斷是什麼重力理論最適合解釋它。</p>
-          <h3>📁 調查資料</h3>
-          <p>「探測器一開始直直飛，但靠近行星時，它開始被吸引並繞著行星旋轉，就像月亮繞地球那樣。我們的時鐘顯示沒什麼變化。」</p>
-        `,
-        question: "你覺得最適合解釋這個現象的是哪一種重力理論？",
+        id: "baby_001",
+        title: "巢外傳來不尋常的聲音，一隻迅猛龍正在接近。",
         options: [
-          "牛頓的萬有引力：有質量的東西會彼此吸引",
-          "狹義相對論：描述高速移動時時間會變慢",
-          "廣義相對論：重力會讓時空彎曲",
-          "黑洞理論：描述黑洞和它發出的能量"
+          {
+            text: "馬上發出叫聲求救",
+            effect: { "safety": 10 },
+            requirement: { "sense": 10 }
+          },
+          {
+            text: "躲進巢穴深處",
+            effect: { "safety": 5, "independence": 5 }
+          },
+          {
+            text: "探頭觀察發生什麼事",
+            effect: { "safety": -10, "sense": 5 }
+          },
+          {
+            text: "嘗試對敵人發出威嚇聲",
+            effect: { "safety": -15, "combat": 5 },
+            requirement: { "combat": 10 }
+          }
         ],
-        answerIndex: 0,
-        feedback: "牛頓認為重力是物體間的吸引力，而愛因斯坦則認為重力是物體使時空彎曲後的結果，兩者理論基礎不同但都很重要。",
-        knowledge: "牛頓在17世紀提出萬有引力定律，成功解釋了行星運動；但到了20世紀，愛因斯坦的廣義相對論指出重力並不是一種真正的「力」，而是質量使周圍的時空彎曲，物體在彎曲的時空中運動才呈現出被『吸引』的效果。這為我們理解緻密天體如黑洞奠定基礎。"
+        knowledge: "暴龍寶寶出生時體型極小，需要仰賴家族保護才能存活。",
+        reference: ""
+      },
+      {
+        id: "baby_002",
+        title: "天氣突然轉變，大雨導致巢穴半淹沒。",
+        options: [
+          {
+            text: "躲到乾燥角落",
+            effect: { "safety": 5 }
+          },
+          {
+            text: "嘗試自己離開巢穴尋找新棲地",
+            effect: { "safety": -10, "independence": 10 },
+            requirement: { "independence": 10 }
+          },
+          {
+            text: "等待父母帶領撤退",
+            effect: { "safety": 10 }
+          },
+          {
+            text: "開始大聲尖叫",
+            effect: { "sense": 5, "safety": -5 }
+          }
+        ],
+        knowledge: "幼年暴龍常生活在群體巢穴中，面臨環境劇變時需要依靠本能與照顧者反應。",
+        reference: ""
+      },
+      {
+        id: "baby_003",
+        title: "一隻小型恐龍靠近巢穴，牠似乎也在覓食。",
+        options: [
+          {
+            text: "偷偷觀察牠的行為",
+            effect: { "sense": 10 }
+          },
+          {
+            text: "發出低鳴試圖嚇走牠",
+            effect: { "combat": 5 },
+            requirement: { "combat": 8 }
+          },
+          {
+            text: "悄悄爬近對方",
+            effect: { "independence": 10, "safety": -5 },
+            requirement: { "independence": 10 }
+          },
+          {
+            text: "立刻跑回家人身邊",
+            effect: { "safety": 10 }
+          }
+        ],
+        knowledge: "感官發展與社交反應是暴龍幼年期的重要學習階段。",
+        reference: ""
+      },
+      {
+        id: "baby_004",
+        title: "你與兄弟姊妹正在等待進食，母親帶回來一塊肉。",
+        options: [
+          {
+            text: "乖乖等候分食",
+            effect: { "safety": 5 }
+          },
+          {
+            text: "搶先上前咬住肉",
+            effect: { "independence": 5, "combat": 5 },
+            requirement: { "combat": 10 }
+          },
+          {
+            text: "觀察其他兄弟姊妹的反應",
+            effect: { "sense": 5 }
+          },
+          {
+            text: "對兄弟姊妹低吼警告",
+            effect: { "combat": 8, "safety": -3 },
+            requirement: { "independence": 10 }
+          }
+        ],
+        knowledge: "暴龍寶寶可能需在同巢兄弟姊妹間競爭食物，這是早期建立社會地位的方式。",
+        reference: ""
+      },
+      {
+        id: "baby_005",
+        title: "你感到四周安靜異常，嗅覺察覺一股陌生氣味。",
+        options: [
+          {
+            text: "保持靜止並提高警覺",
+            effect: { "sense": 10 }
+          },
+          {
+            text: "小聲移動到巢穴邊緣觀察",
+            effect: { "sense": 5, "safety": -5 }
+          },
+          {
+            text: "呼喚其他家人提醒他們注意",
+            effect: { "safety": 5 }
+          },
+          {
+            text: "嘗試自己尋找氣味來源",
+            effect: { "independence": 10, "safety": -10 },
+            requirement: { "independence": 10 }
+          }
+        ],
+        knowledge: "暴龍的嗅覺極為靈敏，研究推測其嗅球比許多現代鳥類還發達，能偵測獵物與敵人動向。",
+        reference: ""
       }
     ];
+    
+    const teenQuestionPool = [
+    
+    ];
+    const adultQuestionPool = [
+    
+    ];
+    const elderQuestionPool = [
+    
+    ];
 
-    let currentQuestion = 0;
+
     let score = 0;
 
     function startGame() {
@@ -240,53 +438,259 @@
     }
     
     function goToPointPage() {
-      document.getElementById("start-screen").classList.add("hidden");
       document.getElementById("point-allocation-screen").classList.remove("hidden");
     }
+    
+    function updatePoints() {
+      const ids = ["safety", "combat", "independence", "sense"];
+      let total = 0;
+      let values = {};
 
+      ids.forEach(id => {
+        let val = parseInt(document.getElementById(id).value);
+        if (isNaN(val) || val < 0) val = 0; // 🛠 防止空值或負數
+        document.getElementById(id).value = val; // 🧽 強制回填修正後的數字
+        values[id] = val;
+        total += val;
+      });
+
+      let remaining = 100 - total;
+      document.getElementById("remaining-points").textContent = remaining >= 0 ? remaining : 0;
+
+      // 修正如果總和超過 100
+      if (remaining < 0) {
+        const activeId = document.activeElement.id;
+        let currentVal = values[activeId];
+        let maxAllowed = 100 - (total - currentVal);
+        if (maxAllowed < 0) maxAllowed = 0;
+        document.getElementById(activeId).value = maxAllowed;
+        values[activeId] = maxAllowed;
+
+        // 重新總計
+        total = 0;
+        ids.forEach(id => {
+          values[id] = parseInt(document.getElementById(id).value) || 0;
+          total += values[id];
+        });
+        remaining = 100 - total;
+        document.getElementById("remaining-points").textContent = remaining;
+      }
+
+      // 更新 max 限制
+      ids.forEach(id => {
+        const input = document.getElementById(id);
+        const currentVal = values[id];
+        input.max = currentVal + remaining;
+      });
+
+      // 按鈕控制
+      const startBtn = document.getElementById("start-btn");
+      if (startBtn) {
+        startBtn.disabled = (remaining !== 0);
+      }
+    }
+
+    // 當玩家確定開始遊戲
+    function confirmPoints() {
+      const ids = ["safety", "combat", "independence", "sense"];
+      let total = 0;
+      let values = {};
+      ids.forEach(id => {
+        const val = parseInt(document.getElementById(id).value) || 0;
+        total += val;
+        values[id] = val;
+      });
+
+      if (total > 100) {
+        alert("總點數超過 100，請重新調整！");
+        return;
+      }
+
+      // 儲存點數到全域變數或傳入下一階段
+      playerStats = {
+        food: 100,
+        intelligence: 50,
+        growth: 70,
+        ...values
+      };
+
+      // 抽出題目（目前是幼年期，抽三題）
+      selectedQuestions = pickQuestionsFromPool(babyQuestionPool, 3);
+
+      document.getElementById("point-allocation-screen").classList.add("hidden");
+      showQuestion();
+    }
+    
+    // 隨機抽題＋隨機選項
+    function pickQuestionsFromPool(pool, count = 3) {
+      const shuffled = [...pool].sort(() => Math.random() - 0.5);
+      return shuffled.slice(0, count);
+    }
+
+    function pickOptionsFromQuestion(question, playerStats, count = 3) {
+      const eligible = question.options.filter(opt => !opt.requirement || meetsRequirement(opt.requirement, playerStats));
+      const ineligible = question.options.filter(opt => opt.requirement && !meetsRequirement(opt.requirement, playerStats));
+
+      let picked = [];
+
+      if (eligible.length >= 1) {
+        picked = [...eligible].sort(() => Math.random() - 0.5).slice(0, count);
+      } else {
+        picked.push(ineligible.sort((a, b) => Object.values(a.requirement)[0] - Object.values(b.requirement)[0])[0]);
+        picked = picked.concat(
+          ineligible.filter((_, i) => i > 0).sort(() => Math.random() - 0.5).slice(0, count - 1)
+        );
+      }
+
+      return picked;
+    }
+
+    function meetsRequirement(requirement, stats) {
+      return Object.entries(requirement).every(([key, val]) => stats[key] >= val);
+    }
+
+    let selectedQuestions = []; // 預先選好的三題
+    let currentQuestion = 0;
+    let currentKnowledge = "";
+
+		// 顯示問題
     function showQuestion() {
-      const q = questions[currentQuestion];
+      const q = selectedQuestions[currentQuestion];
       document.getElementById("question-screen").classList.remove("hidden");
-      document.getElementById("question-title").textContent = q.title;
+      document.getElementById("question-title").textContent = `第 ${currentQuestion + 1} 題`;
+      document.getElementById("question-text").textContent = q.title;
 
-      document.getElementById("question-text").textContent = q.question;
       const optionsContainer = document.getElementById("options-container");
       optionsContainer.innerHTML = "";
-      q.options.forEach((opt, index) => {
+
+      const effectTextDiv = document.getElementById("EffectText");
+      effectTextDiv.textContent = "";
+      effectTextDiv.classList.add("hidden");
+
+      const options = pickOptionsFromQuestion(q, playerStats, 3);
+
+      options.forEach((opt, index) => {
         const btn = document.createElement("button");
-        btn.textContent = opt;
+        btn.textContent = opt.text;
         btn.className = "option-button";
-        btn.onclick = () => checkAnswer(index);
+
+        const canChoose = !opt.requirement || meetsRequirement(opt.requirement, playerStats);
+
+        if (canChoose) {
+          btn.onclick = () => {
+            // 鎖定所有選項
+            Array.from(document.querySelectorAll(".option-button")).forEach(b => {
+              b.disabled = true;
+              b.classList.add("disabled-option");
+            });
+            btn.classList.add("selected-option");
+
+            // 套用能力變動
+            applyEffect(opt.effect || {});
+
+            // 顯示統一的效果提示
+            effectTextDiv.textContent = getEffectText(opt.effect || {});
+            effectTextDiv.classList.remove("hidden");
+            effectTextDiv.classList.add("fade-in");
+
+            setTimeout(() => {
+              effectTextDiv.classList.remove("fade-in");
+              effectTextDiv.classList.add("fade-out");
+
+              setTimeout(() => {
+                document.getElementById("question-screen").classList.add("hidden");
+                document.getElementById("knowledge-screen").classList.remove("hidden");
+                currentKnowledge = q.knowledge || "";
+                document.getElementById("knowledge-text").textContent = currentKnowledge;
+                showStats(); // 顯示參數狀態
+              }, 1000);
+
+            }, 2000);
+          };
+        } else {
+          btn.disabled = true;
+          btn.title = getRequirementText(opt.requirement);
+          btn.classList.add("disabled-option");
+        }
+
         optionsContainer.appendChild(btn);
       });
     }
 
-    function checkAnswer(selectedIndex) {
-      document.getElementById("question-screen").classList.add("hidden");
-      const q = questions[currentQuestion];
-      document.getElementById("feedback-screen").classList.remove("hidden");
-      if (selectedIndex === q.answerIndex) {
-        document.getElementById("feedback-title").textContent = "答對了！";
-        score++;
-      } else {
-        document.getElementById("feedback-title").textContent = "答錯了";
+    // 產生能力增減文字
+    function getEffectText(effect) {
+      return Object.entries(effect)
+        .map(([key, val]) => `${translateStatKey(key)} ${val >= 0 ? "+" : ""}${val}`)
+        .join(" / ");
+    }
+    
+    // 實際修改玩家參數
+    function applyEffect(effect) {
+      for (const [key, val] of Object.entries(effect)) {
+        if (playerStats[key] !== undefined) {
+          playerStats[key] += val;
+        }
       }
-      document.getElementById("feedback-text").textContent = q.feedback;
     }
 
-    function showKnowledge() {
-      document.getElementById("feedback-screen").classList.add("hidden");
-      document.getElementById("knowledge-screen").classList.remove("hidden");
-      document.getElementById("knowledge-text").textContent = questions[currentQuestion].knowledge;
+		// 回饋頁顯示完整參數值
+    function showStats() {
+      const area = document.getElementById("feedback-text");
+      const title = document.getElementById("feedback-title");
+      title.innerText = "總能力值"
+      area.innerHTML = `<ul style="list-style-type: none; padding-left: 0;">` +
+        Object.entries(playerStats).map(([key, val]) =>
+          `<li>${translateStatKey(key)}：${val}</li>`).join("") +
+        "</ul>";
+    }   
+
+    function showFeedback() {
+      document.getElementById("knowledge-screen").classList.add("hidden");
+      document.getElementById("feedback-screen").classList.remove("hidden");
+      document.getElementById("knowledge-text").textContent = currentKnowledge;
     }
+    
+    function getRequirementText(requirement) {
+      if (!requirement) return "";
+      return "需達到以下能力值：\n" + Object.entries(requirement)
+        .map(([key, val]) => `${translateStatKey(key)} ≥ ${val}`)
+        .join("\n");
+    }
+
+    function translateStatKey(key) {
+      const map = {
+      	food: "食物儲備",
+        intelligence: "智力",
+        growth: "成長速度",
+        safety: "安全敏感",
+        combat: "戰鬥能力",
+        independence: "獨立性",
+        sense: "感官靈敏"        
+      };
+      return map[key] || key;
+    }
+    
+    const stagePools = [babyQuestionPool, teenQuestionPool, adultQuestionPool, elderQuestionPool];
+    let currentStage = 0;
 
     function nextQuestion() {
-      document.getElementById("knowledge-screen").classList.add("hidden");
+      document.getElementById("feedback-screen").classList.add("hidden");
       currentQuestion++;
-      if (currentQuestion < questions.length) {
+      if (currentQuestion < selectedQuestions.length) {
         showQuestion();
       } else {
-        showResult();
+        loadNextStage(); // 自動進入下一階段
+      }
+    }
+    
+    function loadNextStage() {
+      currentStage++;
+      if (currentStage < stagePools.length) {
+        selectedQuestions = pickQuestionsFromPool(stagePools[currentStage], 3);
+        currentQuestion = 0;
+        showQuestion();
+      } else {
+        showResult(); // 所有階段完成
       }
     }
 
