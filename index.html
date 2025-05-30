@@ -431,6 +431,7 @@
 
 
     let score = 0;
+    let selectedQuestions = []; // 預先選好的三題
 
     function startGame() {
       document.getElementById("start-screen").classList.add("hidden");
@@ -549,7 +550,7 @@
       return Object.entries(requirement).every(([key, val]) => stats[key] >= val);
     }
 
-    let selectedQuestions = []; // 預先選好的三題
+    
     let currentQuestion = 0;
     let currentKnowledge = "";
 
@@ -670,8 +671,13 @@
       return map[key] || key;
     }
     
-    const stagePools = [babyQuestionPool, teenQuestionPool, adultQuestionPool, elderQuestionPool];
-    let currentStage = 0;
+    const stageConfig = [
+      { pool: babyQuestionPool, count: 3 },
+      { pool: teenQuestionPool, count: 3 },
+      { pool: adultQuestionPool, count: 3 },
+      { pool: elderQuestionPool, count: 2 }
+    ];
+    let currentStage = 0; // 0=幼年、1=青年、2=壯年、3=老年
 
     function nextQuestion() {
       document.getElementById("feedback-screen").classList.add("hidden");
@@ -685,8 +691,9 @@
     
     function loadNextStage() {
       currentStage++;
-      if (currentStage < stagePools.length) {
-        selectedQuestions = pickQuestionsFromPool(stagePools[currentStage], 3);
+      if (currentStage < stageConfig.length) {
+      	const { pool, count } = stageConfig[currentStage];
+        selectedQuestions = pickQuestionsFromPool(pool, count);
         currentQuestion = 0;
         showQuestion();
       } else {
