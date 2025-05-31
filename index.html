@@ -566,6 +566,7 @@
 
       const effectTextDiv = document.getElementById("EffectText");
       effectTextDiv.textContent = "";
+      effectTextDiv.classList.remove("fade-in", "fade-out");
       effectTextDiv.classList.add("hidden");
 
       const options = pickOptionsFromQuestion(q, playerStats, 3);
