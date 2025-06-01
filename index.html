@@ -201,6 +201,12 @@
       line-height: 1.6;
       margin-bottom: 1em;
     }
+    
+    #ending-text {
+      font-size: 1.5em;
+      line-height: 1.6;
+      margin-bottom: 1em;
+    }
 
     #final-feedback {
       font-size: 2em;
@@ -335,6 +341,7 @@
   </div>
   <!-- 結尾頁 -->
   <div id="ending-screen" class="hidden">
+    <p id="ending-text"></p>
     <h6>除了火星，我們還探索銀河中是否有與我們類似的星球。然而，浩瀚星辰中，我們發現自己仍然形單影隻。<br>但是透過璀璨奪目的極光，我們向宇宙展現了我們的存在。<br>你已完成所有任務，成功解碼極光背後的秘密。<br>宇宙仍有許多未知等待被發現——<br>任務結束，但探索永無止境。</h6>
     <h2 id="final-highlight">未來的觀測者，將以你的紀錄為起點，<br>繼續追尋宇宙的光之軌跡。</h2>
     <div id="info-link" class="hidden" style="margin-top: 1em;"></div>
@@ -954,35 +961,40 @@
         triggerChance: 1.0, // ✅ 必定觸發
         condition: stats => stats.sense >= 0/*15*/,
         deathCause: "感官退化",
-        text: "你未察覺接近的敵人，被突襲造成致命傷。"
+        text: "你在夜間獨自行動，周圍傳來細微的聲響與氣味變化。",
+        oncePerStage: true
       },
       {
         id: "event_002",
         triggerChance: 1.0, // ✅ 必定觸發
         condition: stats => stats.food >= 0/*80*/,
         deathCause: "營養不足",
-        text: "你因為長期飢餓無法支持身體重量，虛弱倒下。"
+        text: "你已連續數日未獵食成功，身體開始感到異常虛弱。",
+        oncePerStage: true
       },
       {
         id: "event_003",
         triggerChance: 1.0, // ✅ 必定觸發
         condition: stats => stats.safety >= 0/*20*/,
         deathCause: "防衛不足",
-        text: "你未及時逃離陷阱區域，被捕食者包圍。"
+        text: "你經過一處低地濕地，周圍草叢晃動，看似潛藏掠食者。",
+        oncePerStage: true
       },
       {
         id: "event_004",
         triggerChance: 0.7,
         condition: stats => stats.intelligence >= 0/*55*/,
         deathCause: "應變不足",
-        text: "你錯估環境變化，在泥濘中受困並被獵食。"
+        text: "突然下起大雨，地面變得泥濘，你必須立刻判斷撤離路線。",
+        oncePerStage: true
       },
       {
         id: "event_005",
         triggerChance: 0.7,
         condition: stats => stats.weight >= 0/*80 && stats.length >= 5*/,
         deathCause: "體型不足",
-        text: "你因體型瘦弱無法抵禦敵意威嚇，被驅逐至荒野餓死。"
+        text: "你在一處水源地遇到另一隻成年暴龍，它慢慢逼近試圖驅逐你。",
+        oncePerStage: true
       }
     ];
 
@@ -1123,6 +1135,7 @@
 		let age = 1; // 初始年齡
 		let ageStep = 1; // 幼年階段每關年離增長
     const foodNeedsByStage = [80, 120, 150, 100]; // 幼年、青年、壯年、老年對應的需求
+    let filteredElderEvents = []; // 要真正執行的老年生存事件清單
     let afterEventCallback = null; // 在事件畫面結束後自動觸發用
 
 
@@ -1295,7 +1308,7 @@
     
     function showEventOnly() {
       document.getElementById("event-screen").classList.remove("hidden");
-      document.getElementById("event-text").textContent = pendingEvent.text;
+      document.getElementById("event-text").textContent = pendingEvent.text;      
       
       const effectDiv = document.getElementById("event-effect");
       effectDiv.textContent = "";
@@ -1309,7 +1322,8 @@
 
 		function continueAfterEvent_1() {
       const effectDiv = document.getElementById("event-effect");
-      effectDiv.innerHTML = getEffectText(pendingEvent.effect || {});
+      // 通過致死隨機事件 || 一般隨機事件效果
+      effectDiv.innerHTML = pendingEvent.text1 || getEffectText(pendingEvent.effect || {}) || "（沒有能力變化）";
       effectDiv.classList.remove("hidden");
       effectDiv.classList.add("fade-in");
 
@@ -1372,11 +1386,12 @@
 
     function nextQuestion() {
       document.getElementById("feedback-screen").classList.add("hidden");
-
-      const triggered = maybeTriggerRandomEvent();
-      if (triggered) {
-        showEventOnly(); // 👇 先顯示事件本身（暫不處理能力值變動）
-        return;
+			if (currentStage !== 3) { // 房與老年題庫結束前觸發致死隨機事件
+        const triggered = maybeTriggerRandomEvent();
+        if (triggered) {
+          showEventOnly(); // 👇 先顯示事件本身（暫不處理能力值變動）
+          return;
+        }
       }
       currentQuestion++;
       age += ageStep;
@@ -1385,10 +1400,12 @@
         showQuestion();
       } else {
         if (currentStage === 3) {
+        	// 篩出會觸發的事件（根據機率）
+          filteredElderEvents = elderRandomEvents.filter(event => Math.random() < event.triggerChance);
           runElderSurvivalEvents(); // ✅ 如果老年階段兩題結束就進入存活檢查階段
           return;
         }
-        loadNextStage(); // 自動進入下一階段
+        loadNextStage(); // 老年階段前會自動進入下一階段
       }
     }
     
@@ -1422,18 +1439,20 @@
     }
     
     function runElderSurvivalEvents(index = 0) { // 遞迴式的生存挑戰函式
-      if (index >= elderRandomEvents.length) {
+      if (index >= filteredElderEvents.length) {
         showExtinctionEnding(); // ✅ 全部通過後進入隕石結局
+        console.log("活");
         return;
       }
+			console.log("index: " + index);
+      console.log("length: " + filteredElderEvents.length);
+      const event = filteredElderEvents[index];
 
-      const event = elderRandomEvents[index];
-      const passed = Math.random() < event.triggerChance;
-
-      if (passed && event.condition(playerStats)) {
+      if (event.condition(playerStats)) {
         age++; // ✅ 每通過一題增加年齡
         pendingEvent = {
-          text: `你經歷了嚴峻挑戰：${event.text}，你成功存活`,
+        	...event,
+          text1: `你經歷了嚴峻挑戰並存活了下來！`,
           effect: {}
         };
         showEventOnly(); // ✅ 用你現有事件展示畫面
