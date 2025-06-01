@@ -499,21 +499,21 @@
     // 幼年隨機事件
     const babyRandomEvents = [
       {
-        id: "event_001",
+        id: "babyevent_001",
         triggerChance: 0.3, // 30% 機率觸發
         condition: (stats) => stats.safety < 20, // 安全敏感低於20有可能發生
         text: "你在睡夢中被蛇形生物驚醒，牠正悄悄爬向巢穴。",
         effect: { safety: -5, sense: +5 }
       },
       {
-        id: "event_002",
+        id: "babyevent_002",
         triggerChance: 0.4,
         condition: (stats) => stats.independence > 15,
         text: "你偷偷溜出巢穴，但在附近滑倒跌了一跤。",
         effect: { safety: -10, independence: +5 }
       },
       {
-        id: "event_003",
+        id: "babyevent_003",
         triggerChance: 0.5,
         condition: () => true,
         text: "母親帶回來一塊腐肉，你搶先吃到一口！",
@@ -657,42 +657,42 @@
   	// 青年隨機事件
     const teenRandomEvents = [
       {
-        id: "event_001",
+        id: "teenevent_001",
         triggerChance: 0.3, // 30% 機率觸發
         condition: (stats) => stats.food < 100, // 觸發條件
         text: "你在森林中發現一具被啃咬過的大型恐龍屍體。",
         effect: { food: +20, safety: -5 }
       },
       {
-        id: "event_002",
+        id: "teenevent_002",
         triggerChance: 0.3,
         condition: stats => stats.food < 100,
         text: "你突然感到強烈飢餓，暴龍的高代謝讓你必須立刻進食。",
         effect: { food: -10, weight: -2 }
       },
       {
-        id: "event_003",
+        id: "teenevent_003",
         triggerChance: 0.2,
         condition: stats => stats.safety < 15,
         text: "你在追逐獵物時踩到尖刺植物，腳掌受傷行動變慢。",
         effect: { safety: -5, combat: -5 }
       },
       {
-        id: "event_003",
+        id: "teenevent_004",
         triggerChance: 0.25,
         condition: stats => stats.combat > 15,
         text: "你過去的咬傷開始發炎感染，行動受到影響。",
         effect: { safety: -10, independence: -5 }
       },
       {
-        id: "event_004",
+        id: "teenevent_005",
         triggerChance: 0.15,
         condition: stats => stats.intelligence > 60,
         text: "你偷偷從成年暴龍遺下的屍體中叼走一些肉塊。",
         effect: { food: +15, safety: -10 }
       },
       {
-        id: "event_005",
+        id: "teenevent_006",
         triggerChance: 0.2,
         condition: stats => stats.sense > 15,
         text: "你用敏銳的嗅覺發現一個草食恐龍巢穴，趁虛而入。",
@@ -831,35 +831,35 @@
     
     const adultRandomEvents = [
       {
-        id: "event_001",
+        id: "adultevent_001",
         triggerChance: 0.3,
         condition: stats => stats.independence > 20,
         text: "你在領地邊界發現其他暴龍留下的新鮮氣味，你本能地加強巡邏與防備。",
         effect: { safety: +5, independence: +5 }
       },
       {
-        id: "event_002",
+        id: "adultevent_002",
         triggerChance: 0.25,
         condition: stats => stats.food < 100,
         text: "你在夜間聽到獵物聲音，迅速行動並咬死一隻奔跑中的禽龍。",
         effect: { food: +20, weight: +3 }
       },
       {
-        id: "event_003",
+        id: "adultevent_003",
         triggerChance: 0.2,
         condition: stats => stats.safety < 15,
         text: "你在追擊一群小型恐龍時不慎摔落小坡，膝部擦傷行動受限。",
         effect: { safety: -10, combat: -5 }
       },
       {
-        id: "event_004",
+        id: "adultevent_004",
         triggerChance: 0.15,
         condition: stats => stats.intelligence > 60,
         text: "你利用地形製造聲音假訊號，成功將其他掠食者引開後進食。",
         effect: { food: +15, safety: +10 }
       },
       {
-        id: "event_005",
+        id: "adultevent_005",
         triggerChance: 0.25,
         condition: stats => stats.combat > 20,
         text: "你在與其他暴龍對峙後勝出，對方撤退，你的地位更加穩固。",
@@ -957,7 +957,7 @@
     
 		const elderRandomEvents = [
       {
-        id: "event_001",
+        id: "elderevent_001",
         triggerChance: 1.0, // ✅ 必定觸發
         condition: stats => stats.sense >= 0/*15*/,
         deathCause: "感官退化",
@@ -965,7 +965,7 @@
         oncePerStage: true
       },
       {
-        id: "event_002",
+        id: "elderevent_002",
         triggerChance: 1.0, // ✅ 必定觸發
         condition: stats => stats.food >= 0/*80*/,
         deathCause: "營養不足",
@@ -973,7 +973,7 @@
         oncePerStage: true
       },
       {
-        id: "event_003",
+        id: "elderevent_003",
         triggerChance: 1.0, // ✅ 必定觸發
         condition: stats => stats.safety >= 0/*20*/,
         deathCause: "防衛不足",
@@ -981,7 +981,7 @@
         oncePerStage: true
       },
       {
-        id: "event_004",
+        id: "elderevent_004",
         triggerChance: 0.7,
         condition: stats => stats.intelligence >= 0/*55*/,
         deathCause: "應變不足",
@@ -989,7 +989,7 @@
         oncePerStage: true
       },
       {
-        id: "event_005",
+        id: "elderevent_005",
         triggerChance: 0.7,
         condition: stats => stats.weight >= 0/*80 && stats.length >= 5*/,
         deathCause: "體型不足",
@@ -1135,7 +1135,7 @@
 		let age = 1; // 初始年齡
 		let ageStep = 1; // 幼年階段每關年離增長
     const foodNeedsByStage = [80, 120, 150, 100]; // 幼年、青年、壯年、老年對應的需求
-    let filteredElderEvents = []; // 要真正執行的老年生存事件清單
+    let filteredElderEvents = []; // 要真正執行的致死隨機事件清單
     let afterEventCallback = null; // 在事件畫面結束後自動觸發用
 
 
@@ -1306,7 +1306,7 @@
     }
 		
     
-    function showEventOnly() {
+    function showEventOnly(callback = null) {
       document.getElementById("event-screen").classList.remove("hidden");
       document.getElementById("event-text").textContent = pendingEvent.text;      
       
@@ -1314,6 +1314,9 @@
       effectDiv.textContent = "";
       effectDiv.classList.remove("fade-in", "fade-out");
       effectDiv.classList.add("hidden");
+      console.log("🎬 showEventOnly 呼叫，callback 是:", callback);
+      afterEventCallback = callback; // ✅ 改由這裡集中設定
+      console.log("🎬 AEC 是:", afterEventCallback);
 
       // 顯示按鈕
       document.getElementById("event-continue-1").classList.remove("hidden");
@@ -1340,6 +1343,7 @@
 
         setTimeout(() => {
           document.getElementById("event-screen").classList.add("hidden");
+          console.log("AEC: " + afterEventCallback);
 					if (afterEventCallback) {
             afterEventCallback(); // ✅ 自動進入下一題或結尾
             afterEventCallback = null;
@@ -1444,21 +1448,21 @@
         console.log("活");
         return;
       }
-			console.log("index: " + index);
+      console.log("index: " + index);
       console.log("length: " + filteredElderEvents.length);
       const event = filteredElderEvents[index];
 
       if (event.condition(playerStats)) {
         age++; // ✅ 每通過一題增加年齡
         pendingEvent = {
-        	...event,
+          ...event,
           text1: `你經歷了嚴峻挑戰並存活了下來！`,
           effect: {}
         };
-        showEventOnly(); // ✅ 用你現有事件展示畫面
         // 下一題在 event 結束之後自動觸發
-        afterEventCallback = () => runElderSurvivalEvents(index + 1);
+        showEventOnly(() => {runElderSurvivalEvents(index + 1)});
       } else {
+      	console.log("死");
         showEndingByDeath(event.deathCause);
       }
     }
