@@ -948,39 +948,39 @@
       }
     ];
     
-		const elderSurvivalEvents = [
+		const elderRandomEvents = [
       {
         id: "event_001",
         triggerChance: 1.0, // ✅ 必定觸發
-        condition: stats => stats.sense >= 15,
+        condition: stats => stats.sense >= 0/*15*/,
         deathCause: "感官退化",
         text: "你未察覺接近的敵人，被突襲造成致命傷。"
       },
       {
         id: "event_002",
         triggerChance: 1.0, // ✅ 必定觸發
-        condition: stats => stats.food >= 80,
+        condition: stats => stats.food >= 0/*80*/,
         deathCause: "營養不足",
         text: "你因為長期飢餓無法支持身體重量，虛弱倒下。"
       },
       {
         id: "event_003",
         triggerChance: 1.0, // ✅ 必定觸發
-        condition: stats => stats.safety >= 20,
+        condition: stats => stats.safety >= 0/*20*/,
         deathCause: "防衛不足",
         text: "你未及時逃離陷阱區域，被捕食者包圍。"
       },
       {
         id: "event_004",
         triggerChance: 0.7,
-        condition: stats => stats.intelligence >= 55,
+        condition: stats => stats.intelligence >= 0/*55*/,
         deathCause: "應變不足",
         text: "你錯估環境變化，在泥濘中受困並被獵食。"
       },
       {
         id: "event_005",
         triggerChance: 0.7,
-        condition: stats => stats.weight >= 80 && stats.length >= 5,
+        condition: stats => stats.weight >= 0/*80 && stats.length >= 5*/,
         deathCause: "體型不足",
         text: "你因體型瘦弱無法抵禦敵意威嚇，被驅逐至荒野餓死。"
       }
@@ -1385,7 +1385,7 @@
         showQuestion();
       } else {
         if (currentStage === 3) {
-          runElderSurvivalEvents(); // ✅ 這裡切入存活檢查階段
+          runElderSurvivalEvents(); // ✅ 如果老年階段兩題結束就進入存活檢查階段
           return;
         }
         loadNextStage(); // 自動進入下一階段
@@ -1421,19 +1421,19 @@
       showQuestion(); // 顯示階段第一題
     }
     
-    function runElderSurvivalEvents(index = 0) {
-      if (index >= elderSurvivalEvents.length) {
+    function runElderSurvivalEvents(index = 0) { // 遞迴式的生存挑戰函式
+      if (index >= elderRandomEvents.length) {
         showExtinctionEnding(); // ✅ 全部通過後進入隕石結局
         return;
       }
 
-      const event = elderSurvivalEvents[index];
+      const event = elderRandomEvents[index];
       const passed = Math.random() < event.triggerChance;
 
       if (passed && event.condition(playerStats)) {
         age++; // ✅ 每通過一題增加年齡
         pendingEvent = {
-          text: `你經歷了嚴峻挑戰：${event.text}（你成功存活）`,
+          text: `你經歷了嚴峻挑戰：${event.text}，你成功存活`,
           effect: {}
         };
         showEventOnly(); // ✅ 用你現有事件展示畫面
