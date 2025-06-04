@@ -340,6 +340,7 @@
   </div>
   <!-- 結尾頁 -->
   <div id="ending-screen" class="hidden">
+    <h2>🌟 遊戲結束！</h2>
     <p id="ending-text"></p>
     <h6>除了火星，我們還探索銀河中是否有與我們類似的星球。然而，浩瀚星辰中，我們發現自己仍然形單影隻。<br>但是透過璀璨奪目的極光，我們向宇宙展現了我們的存在。<br>你已完成所有任務，成功解碼極光背後的秘密。<br>宇宙仍有許多未知等待被發現——<br>任務結束，但探索永無止境。</h6>
     <h2 id="final-highlight">未來的觀測者，將以你的紀錄為起點，<br>繼續追尋宇宙的光之軌跡。</h2>
@@ -361,7 +362,7 @@
         <li>8 分：宇宙奧秘大師！你已掌握宇宙的關鍵祕密！</li>
       </ul>
     </div>
-    <button onclick="location.reload()">重新開始</button>
+    <button onclick="restartGame()">重新開始</button>
   </div>
 </div>
   <script>
@@ -958,7 +959,7 @@
       {
         id: "elderevent_001",
         triggerChance: 1.0, // ✅ 必定觸發
-        condition: stats => stats.sense >= 0/*15*/,
+        condition: stats => stats.sense >= 100/*15*/,
         deathCause: "感官退化",
         text: "你在夜間獨自行動，周圍傳來細微的聲響與氣味變化。",
         oncePerStage: true
@@ -997,10 +998,6 @@
       }
     ];
 
-
-
-
-    let score = 0;
     let selectedQuestions = []; // 預先選好的三題
 
     function startGame() {
@@ -1438,11 +1435,8 @@
     function runElderSurvivalEvents(index = 0) { // 遞迴式的生存挑戰函式
       if (index >= filteredElderEvents.length) {
         showExtinctionEnding(); // ✅ 全部通過後進入隕石結局
-        console.log("活");
         return;
       }
-      console.log("index: " + index);
-      console.log("length: " + filteredElderEvents.length);
       const event = filteredElderEvents[index];
 
       if (event.condition(playerStats)) {
@@ -1456,8 +1450,13 @@
         showEventOnly();
         prepareContinueAfterEvent(() => runElderSurvivalEvents(index + 1));
       } else {
-      	console.log("死");
-        showEndingByDeath(event.deathCause);
+      	pendingEvent = {
+          ...event,
+          text1: `這場挑戰超出了你的極限，你倒下了。`,
+          effect: {}
+        };
+        showEventOnly();
+        prepareContinueAfterEvent(() => showEndingByDeath(event.deathCause));      
       }
     }
     // 顯示死亡結尾
@@ -1466,11 +1465,11 @@
       document.getElementById("ending-screen").classList.remove("hidden");
 
       const endingText = {
-        "感官退化": "你未能察覺周圍威脅，感官退化最終讓你暴露在死亡面前。",
-        "營養不足": "飢餓最終壓垮你的身體，你倒下在無人的平原上。",
-        "防衛不足": "你反應不及，被多隻掠食者包圍，結束了你的暴龍生涯。",
-        "應變不足": "你無法應對環境變遷，陷入泥濘無法逃脫。",
-        "體型不足": "你的體型無法威懾對手，被排除在生存圈外。"
+        "感官退化": "你未能察覺周圍威脅，感官退化最終讓你暴露在死亡面前。\n對環境的感知能力衰退，終究成了你的致命弱點。",
+        "營養不足": "飢餓最終壓垮你的身體，你倒下在無人的平原上。\n在這片殘酷的世界裡，沒有足夠的能量，便無法存活。",
+        "防衛不足": "你反應不及，被多隻掠食者包圍，結束了你的暴龍生涯。\n退化的遲緩反應，這片領地終究不屬於你。",
+        "應變不足": "你無法應對環境變遷，陷入泥濘無法逃脫。\n一場泥濘中的掙扎，讓你成為其他生物的獵物。",
+        "體型不足": "你的體型無法威懾對手，最終被驅離。\n孤獨地徘徊在荒野中，飢餓與疲憊讓你逐漸失去生機。"
       };
 
       document.getElementById("ending-text").textContent = endingText[cause] || "你未能活過老年階段。";
@@ -1485,21 +1484,26 @@
     function showResult() {
     	document.getElementById("ending-screen").classList.add("hidden");
       document.getElementById("result-screen").classList.remove("hidden");
-      document.getElementById("final-score").textContent = `你的總分：${score}/8`;
-      let feedback = "";
-      if (score === 8) feedback = "宇宙奧秘大師！你已掌握宇宙的關鍵祕密！";
-      else if (score >= 6) feedback = "太空偵查高手！再一點點就能破解全部謎團！";
-      else if (score >= 4) feedback = "宇宙新探員，你的觀察力正在穩定成長中！";
-      else if (score >= 2) feedback = "好開始是成功的一半，繼續追尋宇宙的奧祕吧！";
-      else feedback = "每次嘗試都更靠近真相，歡迎再次挑戰！";
-      document.getElementById("final-feedback").textContent = feedback;
     }
 
     function restartGame() {
-      score = 0;
-      currentQuestion = 0;
       document.getElementById("result-screen").classList.add("hidden");
-      startGame();
+      document.getElementById("start-screen").classList.remove("hidden");
+      
+      document.getElementById("safety").value = 0;
+      document.getElementById("combat").value = 0;
+      document.getElementById("independence").value = 0;
+      document.getElementById("sense").value = 0;
+      document.getElementById("remaining-points").textContent = 100;
+      document.getElementById("start-btn").disabled = true;
+
+      selectedQuestions = [];
+      currentQuestion = 0;
+      currentKnowledge = "";
+      currentStage = 0;
+      age = 1;
+      ageStep = 1;
+      filteredElderEvents = [];
     }
   </script>
 </body>
