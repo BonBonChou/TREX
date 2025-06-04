@@ -282,7 +282,6 @@
       <p id="para">智力：<strong>50</strong><br>成長速度：<strong>70</strong><br>食物儲備：<strong>100</strong></p>
 
     </div>
-
     <!-- 可分配參數 -->
     <p id="remaining-points-text">你有 <strong id="remaining-points">100</strong> 點能力點數<br>請分配給以下屬性：</p>
     <div class="param-group">
@@ -331,7 +330,7 @@
     <h3 id="event-title">你遭遇了突發事件！</h3>
     <p id="event-text"></p>
     <p id="event-effect" class="option-hint hidden"></p>
-    <button id="event-continue-1" onclick="continueAfterEvent_1()">繼續</button>
+    <button id="event-continue-1">繼續</button>
   </div>
   <!-- 下階段頁 -->
   <div id="stage-screen" class="hidden">
@@ -1006,10 +1005,6 @@
 
     function startGame() {
       document.getElementById("start-screen").classList.add("hidden");
-      goToPointPage();
-    }
-    
-    function goToPointPage() {
       document.getElementById("point-allocation-screen").classList.remove("hidden");
     }
     
@@ -1136,7 +1131,6 @@
 		let ageStep = 1; // 幼年階段每關年離增長
     const foodNeedsByStage = [80, 120, 150, 100]; // 幼年、青年、壯年、老年對應的需求
     let filteredElderEvents = []; // 要真正執行的致死隨機事件清單
-    let afterEventCallback = null; // 在事件畫面結束後自動觸發用
 
 
 		// 顯示問題
@@ -1306,24 +1300,25 @@
     }
 		
     
-    function showEventOnly(callback = null) {
+    function showEventOnly() {
       document.getElementById("event-screen").classList.remove("hidden");
       document.getElementById("event-text").textContent = pendingEvent.text;      
       
       const effectDiv = document.getElementById("event-effect");
       effectDiv.textContent = "";
       effectDiv.classList.remove("fade-in", "fade-out");
-      effectDiv.classList.add("hidden");
-      console.log("🎬 showEventOnly 呼叫，callback 是:", callback);
-      afterEventCallback = callback; // ✅ 改由這裡集中設定
-      console.log("🎬 AEC 是:", afterEventCallback);
+      effectDiv.classList.add("hidden");  
 
       // 顯示按鈕
       document.getElementById("event-continue-1").classList.remove("hidden");
     }
 
+		function prepareContinueAfterEvent(callback) {
+    	const btn = document.getElementById("event-continue-1");
+      btn.onclick = () => continueAfterEvent_1(callback);
+    }
 
-		function continueAfterEvent_1() {
+		function continueAfterEvent_1(callback) {
       const effectDiv = document.getElementById("event-effect");
       // 通過致死隨機事件 || 一般隨機事件效果
       effectDiv.innerHTML = pendingEvent.text1 || getEffectText(pendingEvent.effect || {}) || "（沒有能力變化）";
@@ -1340,13 +1335,10 @@
       setTimeout(() => {
         effectDiv.classList.remove("fade-in");
         effectDiv.classList.add("fade-out");
-
         setTimeout(() => {
           document.getElementById("event-screen").classList.add("hidden");
-          console.log("AEC: " + afterEventCallback);
-					if (afterEventCallback) {
-            afterEventCallback(); // ✅ 自動進入下一題或結尾
-            afterEventCallback = null;
+					if (callback) {
+            callback(); // ✅ 自動進入下一題或結尾
           } else {
             currentQuestion++;
             age += ageStep;
@@ -1394,6 +1386,7 @@
         const triggered = maybeTriggerRandomEvent();
         if (triggered) {
           showEventOnly(); // 👇 先顯示事件本身（暫不處理能力值變動）
+          prepareContinueAfterEvent(null); // 不會做遞迴
           return;
         }
       }
@@ -1460,7 +1453,8 @@
           effect: {}
         };
         // 下一題在 event 結束之後自動觸發
-        showEventOnly(() => {runElderSurvivalEvents(index + 1)});
+        showEventOnly();
+        prepareContinueAfterEvent(() => runElderSurvivalEvents(index + 1));
       } else {
       	console.log("死");
         showEndingByDeath(event.deathCause);
@@ -1489,6 +1483,7 @@
     }
 
     function showResult() {
+    	document.getElementById("ending-screen").classList.add("hidden");
       document.getElementById("result-screen").classList.remove("hidden");
       document.getElementById("final-score").textContent = `你的總分：${score}/8`;
       let feedback = "";
