@@ -219,10 +219,16 @@
       -webkit-text-fill-color: transparent;
       animation: rainbow 2s ease infinite;
     }
-    .final-score {
-      margin-top: 1em;
-      font-size: 1.8em;
-      color: #9a42ff;;
+    #final-title {
+      font-size: 2em;  /* 你可以依需求調整數值 */
+      font-weight: bold; /* 也可以設為 normal, lighter 等 */
+      margin-bottom: 0.5em;
+      color: #9a42ff;
+    }
+    #final-text {
+      font-size: 1.5em;
+      line-height: 1.6;
+      margin-bottom: 1em;
     }
     .all-endings {
       margin-top: 1.6em;
@@ -340,7 +346,6 @@
   </div>
   <!-- 結尾頁 -->
   <div id="ending-screen" class="hidden">
-    <h2>🌟 遊戲結束！</h2>
     <p id="ending-text"></p>
     <h6>除了火星，我們還探索銀河中是否有與我們類似的星球。然而，浩瀚星辰中，我們發現自己仍然形單影隻。<br>但是透過璀璨奪目的極光，我們向宇宙展現了我們的存在。<br>你已完成所有任務，成功解碼極光背後的秘密。<br>宇宙仍有許多未知等待被發現——<br>任務結束，但探索永無止境。</h6>
     <h2 id="final-highlight">未來的觀測者，將以你的紀錄為起點，<br>繼續追尋宇宙的光之軌跡。</h2>
@@ -350,18 +355,8 @@
   <!-- 結算頁 -->
   <div class="hidden" id="result-screen">
     <h2>🌟 遊戲結束！</h2>
-    <p id="final-feedback"></p>
-    <div class="final-score" id="final-score"></div>   
-    <div class="all-endings">
-      <h3>所有評語對照表：</h3>
-      <ul>
-        <li>0–1 分：每次嘗試都更靠近真相，歡迎再次挑戰！</li>
-        <li>2–3 分：好開始是成功的一半，繼續追尋宇宙的奧祕吧！</li>
-        <li>4–5 分：宇宙新探員，你的觀察力正在穩定成長中！</li>
-        <li>6–7 分：太空偵查高手！再一點點就能破解全部謎團！</li>
-        <li>8 分：宇宙奧秘大師！你已掌握宇宙的關鍵祕密！</li>
-      </ul>
-    </div>
+    <p id="final-title"></p>
+    <p id="final-text"></p>
     <button onclick="restartGame()">重新開始</button>
   </div>
 </div>
@@ -1217,7 +1212,7 @@
 		// 回饋頁顯示完整參數值
     function showStats() {
       const area = document.getElementById("feedback-text");
-      const title = document.getElementById("feedback-title");
+      const title = document.getElementById("feedback-title");      
       
       // 計算體型變化
       const diff = playerStats.food - playerStats.foodNeed;
@@ -1237,7 +1232,7 @@
       if (playerStats.weight < 0) playerStats.weight = 0;
       
       // 顯示所有參數
-      title.innerText = "總能力值"
+      title.innerText = "總能力值";
       area.innerHTML = `<ul style="list-style-type: none; padding-left: 0;">` +
         Object.entries(playerStats).map(([key, val]) => {
           if (key === "length") {
@@ -1354,7 +1349,7 @@
       { pool: babyQuestionPool, count: 3, ageStart: 1, ageStep: 1},
       { pool: teenQuestionPool, count: 3, ageStart: 5, ageStep: 2},
       { pool: adultQuestionPool, count: 4, ageStart: 12, ageStep: 3},
-      { pool: elderQuestionPool, count: 2, ageStart: 23, ageStep: 2}
+      { pool: elderQuestionPool, count: 2, ageStart: 23, ageStep: 1}
     ];
     // 開始該階段前的知識補充
     const stageInfo = [
@@ -1484,6 +1479,22 @@
     function showResult() {
     	document.getElementById("ending-screen").classList.add("hidden");
       document.getElementById("result-screen").classList.remove("hidden");
+      
+      const area_f = document.getElementById("final-text");
+      const title_f = document.getElementById("final-title");
+      title_f.innerText = "你的各項能力值";
+      area_f.innerHTML = `<ul style="list-style-type: none; padding-left: 0;">` +
+      	`<li>年齡：${age} 歲</li>` +
+        Object.entries(playerStats).map(([key, val]) => {
+          if (key === "length") {
+            return `<li>體長：${Math.round(val * 10) / 10} 公尺</li>`;
+          } else if (key === "weight") {
+            return `<li>體重：${Math.round(val * 10) / 10} 公斤</li>`;
+          } else {
+            return `<li>${translateStatKey(key)}：${Math.round(val * 10) / 10}</li>`;
+          }
+        }).join("") +
+        "</ul>";
     }
 
     function restartGame() {
