@@ -339,6 +339,7 @@
     <h3 id="event-title">你遭遇了突發事件！</h3>
     <p id="event-text"></p>
     <p id="event-requirement"></p>   
+    <div id="event-choices"></div>    
     <p id="event-effect" class="option-hint hidden"></p>
     <button id="event-continue-1">繼續</button>
   </div>
@@ -511,10 +512,31 @@
       },
       {
         id: "babyevent_003",
-        triggerChance: 0.5,
+        triggerChance: 0.05,
         condition: () => true,
         text: "母親帶回來一塊腐肉，你搶先吃到一口！",
         effect: { food: +10, safety: +5 }
+      },
+      {
+        id: "babyevent_dead_001",
+        triggerChance: 1,
+        condition: () => true,
+        deathCause: "遭翼龍捕食",
+        text: "你在外面玩耍，突然一隻風神翼龍降落到你附近在尋找獵物。",
+        isFatalChoiceEvent: true, // 用來辨識這是特殊有選項的致死事件
+        choices: [
+          {
+            text: "躲起來",
+            requirement: { safety: 12 },
+            successChance: 1,
+            deathCause: "遭翼龍捕食"
+          },
+          {
+            text: "以最快速度跑回家",
+            successChance: 0.2,
+            deathCause: "遭翼龍捕食"
+          }
+        ]
       }
     ];
     
@@ -1129,6 +1151,7 @@
     }
 
     function meetsRequirement(requirement, stats) {
+    	if (!requirement) return true; // ✅ 如果沒有 requirement 視為可以選
       return Object.entries(requirement).every(([key, val]) => stats[key] >= val);
     }
 
@@ -1302,17 +1325,28 @@
       
       for (const event of currentRandomEvents) {
         if (Math.random() < event.triggerChance && event.condition(playerStats)) {
+        	if (event.isFatalChoiceEvent && Array.isArray(event.choices) && event.choices.length > 0) {
+          	pendingEvent = event;
+            //showFatalEventWithChoices(event); // ⬅️ 特殊致死事件邏輯
+            return true;
+          }
           pendingEvent = event;
-          return true; // 表示有事件
+          return true; // 一般隨機事件，之後會進入 showEventOnly
         }
       }
       return false;
     }
 		
-    
+    // 沒選項的隨機事件
     function showEventOnly() {
       document.getElementById("event-screen").classList.remove("hidden");
       document.getElementById("event-text").textContent = pendingEvent.text;
+      
+      // 隱藏選項區塊（避免空白）
+      document.getElementById("event-choices").classList.add("hidden");
+      // 顯示"繼續"按鈕與其他回饋用元素
+      document.getElementById("event-effect").classList.add("hidden");
+      document.getElementById("event-continue-1").classList.add("hidden");
 
       const reqLine = pendingEvent.requirementText
         ? `（通過要求：${pendingEvent.requirementText}）`
@@ -1326,10 +1360,57 @@
       effectDiv.textContent = "";
       effectDiv.classList.remove("fade-in", "fade-out");
       effectDiv.classList.add("hidden");  
-
       // 顯示按鈕
       document.getElementById("event-continue-1").classList.remove("hidden");
     }
+    
+    // 有選項的致死隨機事件
+    function showFatalEventWithChoices(event) {
+
+      document.getElementById("event-screen").classList.remove("hidden");
+      document.getElementById("event-text").textContent = event.text;
+      document.getElementById("event-requirement").textContent = "你要怎麼做？";
+
+      // 隱藏"繼續"按鈕與其他回饋用元素
+      document.getElementById("event-effect").classList.add("hidden");
+      document.getElementById("event-continue-1").classList.add("hidden");
+
+
+      // 顯示選項區塊
+      const choiceContainer = document.getElementById("event-choices");
+      choiceContainer.innerHTML = "";
+      choiceContainer.classList.remove("hidden");
+      event.choices.forEach(choice => {
+      	
+        const btn = document.createElement("button");
+        btn.textContent = choice.text;
+        btn.className = "option-button";
+
+        const canChoose = !choice.requirement || meetsRequirement(choice.requirement, playerStats);
+
+        if (!canChoose) {
+          btn.disabled = true;
+          btn.title = getRequirementText(choice.requirement);
+        } else {
+          btn.onclick = () => {
+            const survived = Math.random() <= choice.successChance;           
+            if (!survived) {
+            	document.getElementById("event-screen").classList.add("hidden");
+              showEndingByDeath(choice.deathCause);
+            } else {
+              // 生還處理
+              pendingEvent = {
+                text1: `你${choice.text}，成功存活下來。`,
+                effect: {}
+              };
+              continueAfterEvent_1();
+            }
+          };
+        }
+        choiceContainer.appendChild(btn);
+      });
+    }
+
 
 		function prepareContinueAfterEvent(callback) {
     	const btn = document.getElementById("event-continue-1");
@@ -1420,7 +1501,10 @@
       document.getElementById("feedback-screen").classList.add("hidden");
 			if (currentStage !== 3) { // 房與老年題庫結束前觸發致死隨機事件
         const triggered = maybeTriggerRandomEvent();
-        if (triggered) {
+        if (triggered && pendingEvent.isFatalChoiceEvent) {
+          showFatalEventWithChoices(pendingEvent);
+          return;
+        } else if (triggered && !pendingEvent.isFatalChoiceEvent) {        	
           showEventOnly(); // 👇 先顯示事件本身（暫不處理能力值變動）
           prepareContinueAfterEvent(null); // 不會做遞迴
           return;
@@ -1505,6 +1589,9 @@
       document.getElementById("ending-screen").classList.remove("hidden");
 
       const endingText = {
+      	"遭翼龍捕食": format(`你試圖逃跑或躲藏，但翼龍早已盯上你。
+        
+        它從天而降，你未能逃離它的魔爪，成為了它的盤中餐……`),
         "感官退化": format(`你未能察覺周圍威脅，感官退化最終讓你暴露在死亡面前。
         
         對環境的感知能力衰退，終究成了你的致命弱點`),
