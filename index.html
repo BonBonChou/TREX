@@ -189,6 +189,13 @@
       font-size: 1.5em;
       line-height: 1.6;
       margin-bottom: 1em;
+      text-align: middle;
+    }
+    #event-requirement {
+      font-size: 1.5em;
+      line-height: 1.6;
+      margin-bottom: 1em;
+      text-align: middle;
     }
     #stage-title {
       font-size: 2em;   
@@ -206,12 +213,7 @@
       font-size: 1.5em;
       line-height: 1.6;
       margin-bottom: 1em;
-    }
-
-    #final-feedback {
-      font-size: 2em;
-      margin: 1em 0;
-      text-align: justify;
+      text-align: middle;
       font-weight: bold;
       background: linear-gradient(270deg, red, orange, yellow, green, blue, indigo, violet, red);
       background-size: 400% 400%;
@@ -219,6 +221,7 @@
       -webkit-text-fill-color: transparent;
       animation: rainbow 2s ease infinite;
     }
+
     #final-title {
       font-size: 2em;  /* 你可以依需求調整數值 */
       font-weight: bold; /* 也可以設為 normal, lighter 等 */
@@ -335,6 +338,7 @@
   <div id="event-screen" class="hidden">
     <h3 id="event-title">你遭遇了突發事件！</h3>
     <p id="event-text"></p>
+    <p id="event-requirement"></p>   
     <p id="event-effect" class="option-hint hidden"></p>
     <button id="event-continue-1">繼續</button>
   </div>
@@ -347,8 +351,6 @@
   <!-- 結尾頁 -->
   <div id="ending-screen" class="hidden">
     <p id="ending-text"></p>
-    <h6>除了火星，我們還探索銀河中是否有與我們類似的星球。然而，浩瀚星辰中，我們發現自己仍然形單影隻。<br>但是透過璀璨奪目的極光，我們向宇宙展現了我們的存在。<br>你已完成所有任務，成功解碼極光背後的秘密。<br>宇宙仍有許多未知等待被發現——<br>任務結束，但探索永無止境。</h6>
-    <h2 id="final-highlight">未來的觀測者，將以你的紀錄為起點，<br>繼續追尋宇宙的光之軌跡。</h2>
     <div id="info-link" class="hidden" style="margin-top: 1em;"></div>
     <button onclick="showResult()">下一頁</button>
   </div>
@@ -954,7 +956,9 @@
       {
         id: "elderevent_001",
         triggerChance: 1.0, // ✅ 必定觸發
-        condition: stats => stats.sense >= 100/*15*/,
+        condition: stats => stats.sense >= 0/*15*/,
+        requirementKey: "sense",
+				requirementMin: 15,
         deathCause: "感官退化",
         text: "你在夜間獨自行動，周圍傳來細微的聲響與氣味變化。",
         oncePerStage: true
@@ -963,6 +967,8 @@
         id: "elderevent_002",
         triggerChance: 1.0, // ✅ 必定觸發
         condition: stats => stats.food >= 0/*80*/,
+        requirementKey: "food",
+				requirementMin: 80,
         deathCause: "營養不足",
         text: "你已連續數日未獵食成功，身體開始感到異常虛弱。",
         oncePerStage: true
@@ -971,6 +977,8 @@
         id: "elderevent_003",
         triggerChance: 1.0, // ✅ 必定觸發
         condition: stats => stats.safety >= 0/*20*/,
+        requirementKey: "safety",
+				requirementMin: 20,
         deathCause: "防衛不足",
         text: "你經過一處低地濕地，周圍草叢晃動，看似潛藏掠食者。",
         oncePerStage: true
@@ -979,19 +987,28 @@
         id: "elderevent_004",
         triggerChance: 0.7,
         condition: stats => stats.intelligence >= 0/*55*/,
+        requirementKey: "intelligence",
+				requirementMin: 55,
         deathCause: "應變不足",
         text: "突然下起大雨，地面變得泥濘，你必須立刻判斷撤離路線。",
         oncePerStage: true
       },
       {
         id: "elderevent_005",
-        triggerChance: 0.7,
+        triggerChance: 1,
         condition: stats => stats.weight >= 0/*80 && stats.length >= 5*/,
+				requirementText: "體重 ≥ 80 公斤，且 體長 ≥ 5 公尺",
         deathCause: "體型不足",
         text: "你在一處水源地遇到另一隻成年暴龍，它慢慢逼近試圖驅逐你。",
         oncePerStage: true
       }
     ];
+    
+    function format(word) {
+  		return word
+      .replace(/\n/g, '<br>') // 若你 intro 裡是用換行符號斷行，也可以加這行
+      .replace(/\s{2,}/g, ''); // 清除多餘空白
+  	}
 
     let selectedQuestions = []; // 預先選好的三題
 
@@ -1123,6 +1140,7 @@
 		let ageStep = 1; // 幼年階段每關年離增長
     const foodNeedsByStage = [80, 120, 150, 100]; // 幼年、青年、壯年、老年對應的需求
     let filteredElderEvents = []; // 要真正執行的致死隨機事件清單
+    let causeOfDeath = "（未知）";
 
 
 		// 顯示問題
@@ -1294,7 +1312,15 @@
     
     function showEventOnly() {
       document.getElementById("event-screen").classList.remove("hidden");
-      document.getElementById("event-text").textContent = pendingEvent.text;      
+      document.getElementById("event-text").textContent = pendingEvent.text;
+
+      const reqLine = pendingEvent.requirementText
+        ? `（通過要求：${pendingEvent.requirementText}）`
+        : pendingEvent.requirementKey
+          ? `（通過要求：${translateStatKey(pendingEvent.requirementKey)} ≥ ${pendingEvent.requirementMin}）`
+          : "";
+
+      document.getElementById("event-requirement").textContent = reqLine;
       
       const effectDiv = document.getElementById("event-effect");
       effectDiv.textContent = "";
@@ -1313,7 +1339,25 @@
 		function continueAfterEvent_1(callback) {
       const effectDiv = document.getElementById("event-effect");
       // 通過致死隨機事件 || 一般隨機事件效果
-      effectDiv.innerHTML = pendingEvent.text1 || getEffectText(pendingEvent.effect || {}) || "（沒有能力變化）";
+      const baseText = pendingEvent.text1 || getEffectText(pendingEvent.effect || {}) || "（沒有能力變化）";
+
+      let valueHint = "";
+      if (pendingEvent.requirementKey) {
+        const key = pendingEvent.requirementKey;
+        const val = playerStats[key];
+        valueHint = `<br>(${translateStatKey(key)}：${Math.round(val * 10) / 10})`;
+      } else if (pendingEvent.requirementText) {
+        const details = [];
+        if (typeof playerStats.weight !== "undefined") {
+          details.push(`體重：${Math.round(playerStats.weight * 10) / 10} 公斤`);
+        }
+        if (typeof playerStats.length !== "undefined") {
+          details.push(`體長：${Math.round(playerStats.length * 10) / 10} 公尺`);
+        }
+        valueHint = `<br>（${details.join("，")}）`;
+      }
+      
+      effectDiv.innerHTML = baseText + valueHint;
       effectDiv.classList.remove("hidden");
       effectDiv.classList.add("fade-in");
 
@@ -1457,23 +1501,39 @@
     // 顯示死亡結尾
     function showEndingByDeath(cause) {
       deathCause = cause;
+      causeOfDeath = cause; // 儲存簡短死因
       document.getElementById("ending-screen").classList.remove("hidden");
 
       const endingText = {
-        "感官退化": "你未能察覺周圍威脅，感官退化最終讓你暴露在死亡面前。\n對環境的感知能力衰退，終究成了你的致命弱點。",
-        "營養不足": "飢餓最終壓垮你的身體，你倒下在無人的平原上。\n在這片殘酷的世界裡，沒有足夠的能量，便無法存活。",
-        "防衛不足": "你反應不及，被多隻掠食者包圍，結束了你的暴龍生涯。\n退化的遲緩反應，這片領地終究不屬於你。",
-        "應變不足": "你無法應對環境變遷，陷入泥濘無法逃脫。\n一場泥濘中的掙扎，讓你成為其他生物的獵物。",
-        "體型不足": "你的體型無法威懾對手，最終被驅離。\n孤獨地徘徊在荒野中，飢餓與疲憊讓你逐漸失去生機。"
+        "感官退化": format(`你未能察覺周圍威脅，感官退化最終讓你暴露在死亡面前。
+        
+        對環境的感知能力衰退，終究成了你的致命弱點`),
+        "營養不足": format(`飢餓最終壓垮你的身體，你倒下在無人的平原上。
+        
+        在這片殘酷的世界裡，沒有足夠的能量，便無法存活。`),
+        "防衛不足": format(`你反應不及，被多隻掠食者包圍，結束了你的暴龍生涯。
+        
+        退化的遲緩反應，這片領地終究不屬於你。`),
+        "應變不足": format(`你無法應對環境變遷，陷入泥濘無法逃脫。
+        
+        一場泥濘中的掙扎，讓你成為其他生物的獵物。`),
+        "體型不足": format(`你的體型無法威懾對手，最終被驅離。
+        
+        孤獨地徘徊在荒野中，飢餓與疲憊讓你逐漸失去生機。`)
       };
 
-      document.getElementById("ending-text").textContent = endingText[cause] || "你未能活過老年階段。";
+      document.getElementById("ending-text").innerHTML = endingText[cause] || "你未能活過老年階段。";
     }
     // 隕石滅絕結局
     function showExtinctionEnding() {
       document.getElementById("ending-screen").classList.remove("hidden");
-      document.getElementById("ending-text").textContent = 
-        "你成功活過老年的嚴峻挑戰，但突如其來的隕石撞擊地球，即使最強的暴龍也無法倖免。";
+      document.getElementById("ending-text").innerHTML = format(
+        `你成功挺過老年的嚴峻挑戰……
+        
+        但突如其來的巨大隕石撞擊了地球，引發火海與氣候崩壞
+        
+        即使最強的暴龍也無法倖免，你也在那場災難中走入歷史。`);
+      causeOfDeath = "隕石撞地球"; // 活過所有事件的死因
     }
 
     function showResult() {
@@ -1484,7 +1544,8 @@
       const title_f = document.getElementById("final-title");
       title_f.innerText = "你的各項能力值";
       area_f.innerHTML = `<ul style="list-style-type: none; padding-left: 0;">` +
-      	`<li>年齡：${age} 歲</li>` +
+      	`<li>死因：${causeOfDeath}</li>` +
+      	`<li>年齡：${age} 歲</li>` +   
         Object.entries(playerStats).map(([key, val]) => {
           if (key === "length") {
             return `<li>體長：${Math.round(val * 10) / 10} 公尺</li>`;
