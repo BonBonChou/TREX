@@ -1393,6 +1393,13 @@
           btn.title = getRequirementText(choice.requirement);
         } else {
           btn.onclick = () => {
+          	// 鎖定所有選項
+            Array.from(document.querySelectorAll(".option-button")).forEach(b => {
+              b.disabled = true;
+              b.classList.add("disabled-option");
+            });
+            btn.classList.add("selected-option");
+            
             const survived = Math.random() <= choice.successChance;           
             if (!survived) {
             	document.getElementById("event-screen").classList.add("hidden");
