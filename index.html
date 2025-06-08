@@ -294,19 +294,19 @@
     <!-- 可分配參數 -->
     <p id="remaining-points-text">你有 <strong id="remaining-points">100</strong> 點能力點數<br>請分配給以下屬性：</p>
     <div class="param-group">
-      <label for="safety">🛡 安全敏感</label>
+      <label for="safety">安全敏感</label>
       <input type="number" id="safety" min="0" max="100" value="0" oninput="updatePoints()" title="避免危險與逃脫能力">
     </div>
     <div class="param-group">
-      <label for="combat">💪 戰鬥能力</label>
+      <label for="combat">戰鬥力</label>
       <input type="number" id="combat" min="0" max="100" value="0" oninput="updatePoints()" title="對抗敵人與競爭對手的能力">
     </div>
     <div class="param-group">
-      <label for="independence">🧬 獨立性</label>
+      <label for="independence">獨立性</label>
       <input type="number" id="independence" min="0" max="100" value="0" oninput="updatePoints()" title="社會互動傾向與建立領地能力">
     </div>
     <div class="param-group">
-      <label for="sense">👃 感官靈敏</label>
+      <label for="sense">感官靈敏</label>
       <input type="number" id="sense" min="0" max="100" value="0" oninput="updatePoints()" title="嗅覺與視覺，找食物與躲危機的能力">
     </div>
 
@@ -367,7 +367,7 @@
     const babyQuestionPool = [
       {
         id: "baby_001",
-        title: "巢外傳來不尋常的聲音，一隻迅猛龍正在接近。",
+        title: "巢外傳來不尋常的聲音，不知何物正在接近。",
         options: [
           {
             text: "馬上發出叫聲求救",
@@ -383,7 +383,7 @@
             effect: { "safety": -10, "sense": 5 }
           },
           {
-            text: "嘗試對敵人發出威嚇聲",
+            text: "嘗試發出威嚇聲",
             effect: { "safety": -15, "combat": 5 },
             requirement: { "combat": 10 }
           }
@@ -1172,8 +1172,7 @@
     const foodNeedsByStage = [80, 120, 150, 100]; // 幼年、青年、壯年、老年對應的需求
     let filteredElderEvents = []; // 要真正執行的致死隨機事件清單
     let causeOfDeath = "（未知）";
-
-
+		
 		// 顯示問題
     function showQuestion() {
       const q = selectedQuestions[currentQuestion];
@@ -1257,6 +1256,33 @@
         }
       }
     }
+    
+    // 計算體長
+		function getIdealLength(t,f) {
+      const Lmax = 13; // 成年最大體長(公尺)
+      const k = 0.7; // 成長速度常數（控制曲線陡峭度）
+      const t0 = 8; // 成長曲線中點年齡（讓曲線中間點對應大約體長成長最快的年齡）
+      const lt = Lmax / (1 + Math.exp(-k * f * (t - t0))); // 第t歲的體長（公尺）
+      return lt;
+    }
+    // 計算體重
+		function getIdealWeight(t,f) {
+      const Wmax = 9000; // 成年最大體重(公斤)
+      const k = 0.6; // 成長速度常數（控制曲線陡峭度）
+      const t0 = 9; // 成長曲線中點年齡（讓曲線中間點對應大約體重成長最快的年齡）
+      
+      function WeightLoss(t,f) { // 因營養不良導致的體重損失
+      	const ts = 8; // 開始出現營養不良體重流失的年齡
+        const alpha = 200 // 體重每年流失量（公斤/年）
+        if (f < 0.7 && t > ts) {
+          return -alpha * (t - ts);
+        }
+        return 0;
+      }
+      
+      const wt = Wmax / (1 + Math.exp(-k * f * (t - t0))) + WeightLoss(t,f); // 第t歲的體重（公斤）
+      return wt > 0 ? wt : 0; // 保護下限
+    }
 
 		// 回饋頁顯示完整參數值
     function showStats() {
@@ -1265,20 +1291,17 @@
       
       // 計算體型變化
       const diff = playerStats.food - playerStats.foodNeed;
-      if (diff >= 20) {
-        playerStats.length += 1;
-        playerStats.weight += 5;
-      } else if (diff >= 0) {
-        playerStats.length += 0.5;
-        playerStats.weight += 2;
+      let f = 1; // 食物供應因子，預設食物充足
+      if (diff >= 0) {
+        f = 1; // 食物充足（正常成長）
+      } else if (diff >= -10) {
+        f = 0.7; // 食物不充足（輕度影響）
       } else {
-        playerStats.length -= 0.5;
-        playerStats.weight -= 2;
+        f = 0.4; // 食物嚴重不足（營養不良）
       }
-
-      // 保護下限
-      if (playerStats.length < 0) playerStats.length = 0;
-      if (playerStats.weight < 0) playerStats.weight = 0;
+      
+      playerStats.length = getIdealLength(age,f);
+      playerStats.weight = getIdealWeight(age,f);
       
       // 顯示所有參數
       title.innerText = "總能力值";
@@ -1293,7 +1316,7 @@
           }
         }).join("") +
         "</ul>";
-    }   
+    }
 
     function showFeedback() {
       document.getElementById("knowledge-screen").classList.add("hidden");
@@ -1314,7 +1337,7 @@
         intelligence: "智力",
         growth: "成長速度",
         safety: "安全敏感",
-        combat: "戰鬥能力",
+        combat: "戰鬥力",
         independence: "獨立性",
         sense: "感官靈敏",
         foodNeed: "食物需求",
