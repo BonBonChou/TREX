@@ -524,11 +524,12 @@
         deathCause: "遭翼龍捕食",
         text: "你在外面玩耍，突然一隻風神翼龍降落到你附近在尋找獵物。",
         isFatalChoiceEvent: true, // 用來辨識這是特殊有選項的致死事件
+        oncePerStage: true,
         choices: [
           {
             text: "躲起來",
             requirement: { safety: 12 },
-            successChance: 0.5,
+            successChance: 1.5,
             successText: "你屏住呼吸躲在草叢中，幸運的是翼龍沒有發現你。",
             deathCause: "遭翼龍捕食"
           },
@@ -695,7 +696,7 @@
         triggerChance: 0.3,
         condition: stats => stats.food < 100,
         text: "你突然感到強烈飢餓，暴龍的高代謝讓你必須立刻進食。",
-        effect: { food: -10, weight: -2 }
+        effect: { food: -10, combat: -5}
       },
       {
         id: "teenevent_003",
@@ -869,7 +870,7 @@
         triggerChance: 0.25,
         condition: stats => stats.food < 100,
         text: "你在夜間聽到獵物聲音，迅速行動並咬死一隻奔跑中的禽龍。",
-        effect: { food: +20, weight: +3 }
+        effect: { food: +20}
       },
       {
         id: "adultevent_003",
@@ -1169,9 +1170,10 @@
     let currentStage = 0; // 0=幼年、1=青年、2=壯年、3=老年
 		let age = 1; // 初始年齡
 		let ageStep = 1; // 幼年階段每關年離增長
-    const foodNeedsByStage = [80, 120, 150, 100]; // 幼年、青年、壯年、老年對應的需求
+    const foodNeedsByStage = [80, 100, 150, 120]; // 幼年、青年、壯年、老年對應的需求
     let filteredElderEvents = []; // 要真正執行的致死隨機事件清單
     let causeOfDeath = "（未知）";
+    let triggeredEventIds = new Set();
 		
 		// 顯示問題
     function showQuestion() {
@@ -1259,17 +1261,25 @@
     
     // 計算體長
 		function getIdealLength(t,f) {
+    	const Lmin = 0.5;   // 剛出生時約0.5米長
       const Lmax = 13; // 成年最大體長(公尺)
-      const k = 0.7; // 成長速度常數（控制曲線陡峭度）
+      const k = 0.6; // 成長速度常數（控制曲線陡峭度）
       const t0 = 8; // 成長曲線中點年齡（讓曲線中間點對應大約體長成長最快的年齡）
-      const lt = Lmax / (1 + Math.exp(-k * f * (t - t0))); // 第t歲的體長（公尺）
+      const lt = Lmin + Lmax / (1 + Math.exp(-k * f * (t - t0))); // 第t歲的體長（公尺）
       return lt;
     }
     // 計算體重
 		function getIdealWeight(t,f) {
+    	const Wmin = 10;    // 剛出生時約10公斤
       const Wmax = 9000; // 成年最大體重(公斤)
-      const k = 0.6; // 成長速度常數（控制曲線陡峭度）
-      const t0 = 9; // 成長曲線中點年齡（讓曲線中間點對應大約體重成長最快的年齡）
+      
+
+      function juvenileWeight(t, f) { // 0-3歲成長期
+        // 用指數成長模型，參數可調整
+        const r = f;  // 成長速率隨食物調整
+        console.log(t);
+        return Wmin * Math.exp(r * t);        
+      }
       
       function WeightLoss(t,f) { // 因營養不良導致的體重損失
       	const ts = 8; // 開始出現營養不良體重流失的年齡
@@ -1279,8 +1289,21 @@
         }
         return 0;
       }
+           
+      function adultWeight(t, f) { // 4歲以上成長
+        const k = 0.7; // 成長速度常數（控制曲線陡峭度）
+      	const t0 = 10; // 成長曲線中點年齡（讓曲線中間點對應大約體重成長最快的年齡）
+        return Wmin + (Wmax - Wmin) / (1 + Math.exp(-k * f * (t - t0))) + WeightLoss(t,f);
+      }
       
-      const wt = Wmax / (1 + Math.exp(-k * f * (t - t0))) + WeightLoss(t,f); // 第t歲的體重（公斤）
+			// 根據年齡決定用哪個模型
+      let wt;
+      if (t <= 3) {
+        wt = juvenileWeight(t, f);        
+      } else {
+        wt = adultWeight(t, f);
+      }
+
       return wt > 0 ? wt : 0; // 保護下限
     }
 
@@ -1294,7 +1317,7 @@
       let f = 1; // 食物供應因子，預設食物充足
       if (diff >= 0) {
         f = 1; // 食物充足（正常成長）
-      } else if (diff >= -10) {
+      } else if (diff >= -20) {
         f = 0.7; // 食物不充足（輕度影響）
       } else {
         f = 0.4; // 食物嚴重不足（營養不良）
@@ -1306,6 +1329,7 @@
       // 顯示所有參數
       title.innerText = "總能力值";
       area.innerHTML = `<ul style="list-style-type: none; padding-left: 0;">` +
+      	`<li>年齡：${age} 歲</li>` +
         Object.entries(playerStats).map(([key, val]) => {
           if (key === "length") {
             return `<li>體長：${Math.round(val * 10) / 10} 公尺</li>`;
@@ -1354,11 +1378,20 @@
     function maybeTriggerRandomEvent() {
       pendingEvent = null; // 重置
       
-      for (const event of currentRandomEvents) {
+      const availableEvents = currentRandomEvents.filter(event => {
+        const alreadyTriggered = triggeredEventIds.has(event.id);
+        const shouldTrigger = Math.random() < event.triggerChance;
+        return shouldTrigger && (!event.oncePerStage || !alreadyTriggered);
+      });
+      
+      for (const event of availableEvents) {
         if (Math.random() < event.triggerChance && event.condition(playerStats)) {
         	if (event.isFatalChoiceEvent && Array.isArray(event.choices) && event.choices.length > 0) {
           	pendingEvent = event;
-            //showFatalEventWithChoices(event); // ⬅️ 特殊致死事件邏輯
+            
+            if (event.oncePerStage) {
+              triggeredEventIds.add(event.id);
+            }
             return true;
           }
           pendingEvent = event;
@@ -1567,6 +1600,7 @@
     function loadNextStage() {
       currentStage++;
       if (currentStage < stageConfig.length) {
+      	triggeredEventIds.clear(); // 清空上一階段的記錄
       	const config = stageConfig[currentStage];
         selectedQuestions = pickQuestionsFromPool(config.pool, config.count);
         currentQuestion = 0;
@@ -1670,7 +1704,7 @@
       title_f.innerText = "你的各項能力值";
       area_f.innerHTML = `<ul style="list-style-type: none; padding-left: 0;">` +
       	`<li>死因：${causeOfDeath}</li>` +
-      	`<li>年齡：${age} 歲</li>` +   
+      	`<li>年齡：${age} 歲</li>` +
         Object.entries(playerStats).map(([key, val]) => {
           if (key === "length") {
             return `<li>體長：${Math.round(val * 10) / 10} 公尺</li>`;
@@ -1702,6 +1736,7 @@
       ageStep = 1;
       filteredElderEvents = [];
       causeOfDeath = "（未知）";
+      triggeredEventIds.clear();
     }
   </script>
 </body>
