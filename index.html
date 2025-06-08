@@ -528,12 +528,20 @@
           {
             text: "躲起來",
             requirement: { safety: 12 },
-            successChance: 1,
+            successChance: 0.5,
+            successText: "你屏住呼吸躲在草叢中，幸運的是翼龍沒有發現你。",
             deathCause: "遭翼龍捕食"
           },
           {
             text: "以最快速度跑回家",
-            successChance: 0.2,
+            successChance: 0.1,
+            successText: "你拔腿狂奔，在翼龍抓到你之前驚險地衝回了巢穴。",
+            deathCause: "遭翼龍捕食"
+          },
+          {
+            text: "大聲呼叫媽媽",
+            successChance: 0.1,
+            successText: "你邊跑邊大聲呼喊，媽媽在你被翼龍抓到前出現並趕走了翼龍。",
             deathCause: "遭翼龍捕食"
           }
         ]
@@ -1407,7 +1415,7 @@
             } else {
               // 生還處理
               pendingEvent = {
-                text1: `你${choice.text}，成功存活下來。`,
+                text1: choice.successText || `你${choice.text}，成功存活下來。`,
                 effect: {}
               };
               continueAfterEvent_1();
