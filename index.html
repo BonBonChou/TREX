@@ -297,6 +297,16 @@
       cursor: not-allowed;
     }
     
+    .param-up {
+      color: #27ae60; /* 綠色，代表增加 */
+      font-weight: bold;
+    }
+    .param-down {
+      color: #c0392b; /* 紅色，代表減少 */
+      font-weight: bold;
+    }
+
+    
     
   </style>
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC&display=swap" rel="stylesheet">
@@ -1294,7 +1304,7 @@
                 document.getElementById("knowledge-screen").classList.remove("hidden");
                 currentKnowledge = q.knowledge || "";
                 document.getElementById("knowledge-text").textContent = currentKnowledge;
-                showStats(); // 顯示參數狀態
+                showStats(opt.effect); // 顯示參數狀態
               }, 1000);
 
             }, 2000);
@@ -1385,7 +1395,7 @@
     }
 
 		// 回饋頁顯示完整參數值
-    function showStats() {
+    function showStats(effect = {}) {
       const area = document.getElementById("feedback-text");
       const title = document.getElementById("feedback-title");      
       
@@ -1408,12 +1418,28 @@
       area.innerHTML = `<ul style="list-style-type: none; padding-left: 0;">` +
       	`<li>年齡：${age} 歲</li>` +
         Object.entries(playerStats).map(([key, val]) => {
+        	const rounded = Math.round(val * 10) / 10;
+        	// 箭頭與樣式根據 effect[key] 判定
+          let arrow = "";
+          let className = "";
+
+          if (effect.hasOwnProperty(key)) {
+            const delta = effect[key];
+            if (delta > 0) {
+              arrow = " ▲";
+              className = "param-up";
+            } else if (delta < 0) {
+              arrow = " ▼";
+              className = "param-down";
+            }
+          }
+          
           if (key === "length") {
-            return `<li>體長：${Math.round(val * 10) / 10} 公尺</li>`;
+            return `<li>體長：${rounded} 公尺</li>`;
           } else if (key === "weight") {
-            return `<li>體重：${Math.round(val * 10) / 10} 公斤</li>`;
+            return `<li>體重：${rounded} 公斤</li>`;
           } else {
-            return `<li>${translateStatKey(key)}：${Math.round(val * 10) / 10}</li>`;
+            return `<li class="${className}">${translateStatKey(key)}：${rounded}${arrow}</li>`;
           }
         }).join("") +
         "</ul>";
@@ -1687,7 +1713,7 @@
       }
     }
     // 回饋頁顯示完整參數值
-    function showStatsMid() {
+    function showStatsMid(effect = {}) {
       const area = document.getElementById("feedback-text-mid");
       const title = document.getElementById("feedback-title-mid");      
       
@@ -1710,12 +1736,28 @@
       area.innerHTML = `<ul style="list-style-type: none; padding-left: 0;">` +
       	`<li>年齡：${age} 歲</li>` +
         Object.entries(playerStats).map(([key, val]) => {
+          const rounded = Math.round(val * 10) / 10;
+        	// 箭頭與樣式根據 effect[key] 判定
+          let arrow = "";
+          let className = "";
+
+          if (effect.hasOwnProperty(key)) {
+            const delta = effect[key];
+            if (delta > 0) {
+              arrow = " ▲";
+              className = "param-up";
+            } else if (delta < 0) {
+              arrow = " ▼";
+              className = "param-down";
+            }
+          }
+          
           if (key === "length") {
-            return `<li>體長：${Math.round(val * 10) / 10} 公尺</li>`;
+            return `<li>體長：${rounded} 公尺</li>`;
           } else if (key === "weight") {
-            return `<li>體重：${Math.round(val * 10) / 10} 公斤</li>`;
+            return `<li>體重：${rounded} 公斤</li>`;
           } else {
-            return `<li>${translateStatKey(key)}：${Math.round(val * 10) / 10}</li>`;
+            return `<li class="${className}">${translateStatKey(key)}：${rounded}${arrow}</li>`;
           }
         }).join("") +
         "</ul>";
@@ -1723,11 +1765,16 @@
 
     function confirmMidPoints() {
       const ids = ["safety", "combat", "independence", "sense"];
+      const effect = {};
       ids.forEach(stat => {
         const val = parseInt(document.getElementById(stat + "-mid").value) || 0;
         playerStats[stat] += val;
+        effect = {
+        ...event,
+        stat: val};
       });
-			showStatsMid();
+      console.log(effect);
+			showStatsMid(effect);
       document.getElementById("mid-point-allocation-screen").classList.add("hidden");
       document.getElementById("feedback-screen-mid").classList.remove("hidden"); // 進入第一題
     }
