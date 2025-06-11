@@ -512,14 +512,14 @@
       },
       {
         id: "babyevent_003",
-        triggerChance: 0.05,
+        triggerChance: 0.5,
         condition: () => true,
         text: "母親帶回來一塊腐肉，你搶先吃到一口！",
         effect: { food: +10, safety: +5 }
       },
       {
         id: "babyevent_dead_001",
-        triggerChance: 1,
+        triggerChance: 0.6,
         condition: () => true,
         deathCause: "遭翼龍捕食",
         text: "你在外面玩耍，突然一隻風神翼龍降落到你附近在尋找獵物。",
@@ -529,19 +529,19 @@
           {
             text: "躲起來",
             requirement: { safety: 12 },
-            successChance: 1.5,
+            successChance: 0.5,
             successText: "你屏住呼吸躲在草叢中，幸運的是翼龍沒有發現你。",
             deathCause: "遭翼龍捕食"
           },
           {
             text: "以最快速度跑回家",
-            successChance: 0.1,
+            successChance: 0.2,
             successText: "你拔腿狂奔，在翼龍抓到你之前驚險地衝回了巢穴。",
             deathCause: "遭翼龍捕食"
           },
           {
             text: "大聲呼叫媽媽",
-            successChance: 0.1,
+            successChance: 0.2,
             successText: "你邊跑邊大聲呼喊，媽媽在你被翼龍抓到前出現並趕走了翼龍。",
             deathCause: "遭翼龍捕食"
           }
@@ -1277,7 +1277,6 @@
       function juvenileWeight(t, f) { // 0-3歲成長期
         // 用指數成長模型，參數可調整
         const r = f;  // 成長速率隨食物調整
-        console.log(t);
         return Wmin * Math.exp(r * t);        
       }
       
@@ -1386,16 +1385,16 @@
       
       for (const event of availableEvents) {
         if (Math.random() < event.triggerChance && event.condition(playerStats)) {
-        	if (event.isFatalChoiceEvent && Array.isArray(event.choices) && event.choices.length > 0) {
-          	pendingEvent = event;
+        	if (event.oncePerStage) {
+            triggeredEventIds.add(event.id);
             
-            if (event.oncePerStage) {
-              triggeredEventIds.add(event.id);
+            if (event.isFatalChoiceEvent && Array.isArray(event.choices) && event.choices.length > 0) {
+              pendingEvent = event;
+              return true;
             }
-            return true;
+            pendingEvent = event;
+            return true; // 一般隨機事件，之後會進入 showEventOnly
           }
-          pendingEvent = event;
-          return true; // 一般隨機事件，之後會進入 showEventOnly
         }
       }
       return false;
@@ -1464,16 +1463,25 @@
             });
             btn.classList.add("selected-option");
             
-            const survived = Math.random() <= choice.successChance;           
+            let chance = 0;
+            if (typeof choice.successChance === "function") {
+              chance = choice.successChance(playerStats); // 呼叫函式取得機率
+            } else {
+              chance = choice.successChance; // 傳統靜態機率
+            }
+
+            const survived = Math.random() < chance;
             if (!survived) {
             	document.getElementById("event-screen").classList.add("hidden");
               showEndingByDeath(choice.deathCause);
             } else {
               // 生還處理
               pendingEvent = {
+              	...event,
                 text1: choice.successText || `你${choice.text}，成功存活下來。`,
                 effect: {}
               };
+              
               continueAfterEvent_1();
             }
           };
@@ -1490,9 +1498,12 @@
 
 		function continueAfterEvent_1(callback) {
       const effectDiv = document.getElementById("event-effect");
+      effectDiv.textContent = "";
+      effectDiv.classList.remove("fade-in", "fade-out");
+      effectDiv.classList.add("hidden");
       // 通過致死隨機事件 || 一般隨機事件效果
       const baseText = pendingEvent.text1 || getEffectText(pendingEvent.effect || {}) || "（沒有能力變化）";
-
+			
       let valueHint = "";
       if (pendingEvent.requirementKey) {
         const key = pendingEvent.requirementKey;
@@ -1512,7 +1523,7 @@
       effectDiv.innerHTML = baseText + valueHint;
       effectDiv.classList.remove("hidden");
       effectDiv.classList.add("fade-in");
-
+			console.log(callback);
       // 立刻套用能力值
       applyEffect(pendingEvent.effect || {});
 
