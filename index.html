@@ -77,6 +77,30 @@
       border-radius: 10px;
     }
     
+    #point-allocation-text-mid {
+      font-size: 2em;
+      font-weight: bold; /* 也可以設為 normal, lighter 等 */
+      margin-bottom: 0.5em;
+      color: #9a42ff;
+    }
+    
+    #para-mid {
+      font-size: 1.5em;  /* 你可以依需求調整數值 */
+      font-weight: bold; /* 也可以設為 normal, lighter 等 */
+      margin: 1em 0;
+      margin-bottom: 0.5em;
+    }
+    #remaining-points-mid {
+      /*font-size: 1.5em;  /* 你可以依需求調整數值 */
+      font-weight: bold; /* 也可以設為 normal, lighter 等 */
+      margin-bottom: 0.5em;
+    }
+    #remaining-points-text-mid {
+      font-size: 1.5em;  /* 你可以依需求調整數值 */
+      font-weight: bold; /* 也可以設為 normal, lighter 等 */
+      margin-bottom: 0.5em;
+    }
+    
     #point-allocation-text {
       font-size: 2em;
       font-weight: bold; /* 也可以設為 normal, lighter 等 */
@@ -117,7 +141,6 @@
       width: 60px;
       padding: 0.3em;
       font-size: 1em;
-      
     }
     
     #question-title {
@@ -162,6 +185,17 @@
       color: #9a42ff;
     }
     #feedback-text {
+      font-size: 1.5em;
+      line-height: 1.6;
+      margin-bottom: 1em;
+    }
+    #feedback-title-mid {
+      font-size: 2em;  /* 你可以依需求調整數值 */
+      font-weight: bold; /* 也可以設為 normal, lighter 等 */
+      margin-bottom: 0.5em;
+      color: #9a42ff;
+    }
+    #feedback-text-mid {
       font-size: 1.5em;
       line-height: 1.6;
       margin-bottom: 1em;
@@ -349,6 +383,38 @@
     <p id="stage-description"></p>
     <button onclick="startStage()">開始</button>
   </div>
+  <!-- 階段中分配點數頁 -->
+  <div id="mid-point-allocation-screen" class="hidden">
+    <h2 id="point-allocation-text-mid">能力分配</h2>
+    <!-- 可分配參數 -->
+    <p id="remaining-points-text-mid">你成長了，獲得 <strong id="remaining-points-mid">20</strong> 點能力點數<br>請分配給以下屬性：</p>
+    <div class="param-group">
+      <label for="safety">安全敏感</label>
+      <input type="number" id="safety-mid" min="0" value="0" oninput="updateMidPoints()" title="避免危險與逃脫能力">
+    </div>
+    <div class="param-group">
+      <label for="combat">戰鬥力</label>
+      <input type="number" id="combat-mid" min="0" value="0" oninput="updateMidPoints()" title="對抗敵人與競爭對手的能力">
+    </div>
+    <div class="param-group">
+      <label for="independence">獨立性</label>
+      <input type="number" id="independence-mid" min="0" value="0" oninput="updateMidPoints()" title="社會互動傾向與建立領地能力">
+    </div>
+    <div class="param-group">
+      <label for="sense">感官靈敏</label>
+      <input type="number" id="sense-mid" min="0" value="0" oninput="updateMidPoints()" title="嗅覺與視覺，找食物與躲危機的能力">
+    </div>
+
+    <p style="color: red;" id="point-warning-mid" class="hidden">點數總和不可超過 20！</p>
+
+    <button id="confirm-mid" onclick="confirmMidPoints()" disabled>確定</button>
+  </div>
+  <!-- 階段中回饋頁 -->
+  <div class="hidden" id="feedback-screen-mid">
+    <h3 id="feedback-title-mid"></h3>
+    <p id="feedback-text-mid"></p>
+    <button onclick="showQuestionMid()">下一頁</button>
+  </div> 
   <!-- 結尾頁 -->
   <div id="ending-screen" class="hidden">
     <p id="ending-text"></p>
@@ -1266,7 +1332,17 @@
       const k = 0.6; // 成長速度常數（控制曲線陡峭度）
       const t0 = 8; // 成長曲線中點年齡（讓曲線中間點對應大約體長成長最快的年齡）
       const lt = Lmin + Lmax / (1 + Math.exp(-k * f * (t - t0))); // 第t歲的體長（公尺）
-      return lt;
+      function LengthtLoss(t,f) { // 因營養不良導致的體長損失
+      	const ts = 15; // 開始出現營養不良體長流失的年齡
+        const alpha = 1 // 體重每年流失量（公尺/年）
+        if (f < 0.7 && t > ts) {
+          return -2 * alpha * (t - ts);
+        } else if (f < 1 && t > ts) {
+          return -alpha * (t - ts);
+        }
+        return 0;
+      }
+      return lt + LengthtLoss(t,f);
     }
     // 計算體重
 		function getIdealWeight(t,f) {
@@ -1284,6 +1360,8 @@
       	const ts = 8; // 開始出現營養不良體重流失的年齡
         const alpha = 200 // 體重每年流失量（公斤/年）
         if (f < 0.7 && t > ts) {
+          return -2 * alpha * (t - ts);
+        } else if (f < 1 && t > ts) {
           return -alpha * (t - ts);
         }
         return 0;
@@ -1523,7 +1601,6 @@
       effectDiv.innerHTML = baseText + valueHint;
       effectDiv.classList.remove("hidden");
       effectDiv.classList.add("fade-in");
-			console.log(callback);
       // 立刻套用能力值
       applyEffect(pendingEvent.effect || {});
 
@@ -1551,6 +1628,117 @@
 
       }, 2000);
     }
+    // 階段中分配
+    function showMidPointAllocation() {
+      document.getElementById("mid-point-allocation-screen").classList.remove("hidden");
+      const ids = ["safety-mid", "combat-mid", "independence-mid", "sense-mid"];
+      ids.forEach(id => document.getElementById(id).value = 0);
+      document.getElementById("remaining-points-mid").textContent = 20;
+      document.getElementById("confirm-mid").disabled = true;
+      document.getElementById("point-warning-mid").classList.add("hidden");
+    }
+    
+    function updateMidPoints() {
+      const ids = ["safety-mid", "combat-mid", "independence-mid", "sense-mid"];
+      let total = 0;
+      let values = {};
+
+      ids.forEach(id => {
+        let val = parseInt(document.getElementById(id).value);
+        if (isNaN(val) || val < 0) val = 0; // 🛠 防止空值或負數
+        document.getElementById(id).value = val; // 🧽 強制回填修正後的數字
+        values[id] = val;
+        total += val;
+      });
+
+      let remaining = 20 - total;
+      document.getElementById("remaining-points-mid").textContent = remaining >= 0 ? remaining : 0;
+
+      // 修正如果總和超過 20
+      if (remaining < 0) {
+        const activeId = document.activeElement.id;
+        let currentVal = values[activeId];
+        let maxAllowed = 20 - (total - currentVal);
+        if (maxAllowed < 0) maxAllowed = 0;
+        document.getElementById(activeId).value = maxAllowed;
+        values[activeId] = maxAllowed;
+
+        // 重新總計
+        total = 0;
+        ids.forEach(id => {
+          values[id] = parseInt(document.getElementById(id).value) || 0;
+          total += values[id];
+        });
+        remaining = 20 - total;
+        document.getElementById("remaining-points-mid").textContent = remaining;
+      }
+
+      // 更新 max 限制
+      ids.forEach(id => {
+        const input = document.getElementById(id);
+        const currentVal = values[id];
+        input.max = currentVal + remaining;
+      });
+
+      // 按鈕控制
+      const startBtn = document.getElementById("confirm-mid");
+      if (startBtn) {
+        startBtn.disabled = (remaining !== 0);
+      }
+    }
+    // 回饋頁顯示完整參數值
+    function showStatsMid() {
+      const area = document.getElementById("feedback-text-mid");
+      const title = document.getElementById("feedback-title-mid");      
+      
+      // 計算體型變化
+      const diff = playerStats.food - playerStats.foodNeed;
+      let f = 1; // 食物供應因子，預設食物充足
+      if (diff >= 0) {
+        f = 1; // 食物充足（正常成長）
+      } else if (diff >= -20) {
+        f = 0.7; // 食物不充足（輕度影響）
+      } else {
+        f = 0.4; // 食物嚴重不足（營養不良）
+      }
+      
+      playerStats.length = getIdealLength(age,f);
+      playerStats.weight = getIdealWeight(age,f);
+      
+      // 顯示所有參數
+      title.innerText = "總能力值";
+      area.innerHTML = `<ul style="list-style-type: none; padding-left: 0;">` +
+      	`<li>年齡：${age} 歲</li>` +
+        Object.entries(playerStats).map(([key, val]) => {
+          if (key === "length") {
+            return `<li>體長：${Math.round(val * 10) / 10} 公尺</li>`;
+          } else if (key === "weight") {
+            return `<li>體重：${Math.round(val * 10) / 10} 公斤</li>`;
+          } else {
+            return `<li>${translateStatKey(key)}：${Math.round(val * 10) / 10}</li>`;
+          }
+        }).join("") +
+        "</ul>";
+    }
+
+    function confirmMidPoints() {
+      const ids = ["safety", "combat", "independence", "sense"];
+      ids.forEach(stat => {
+        const val = parseInt(document.getElementById(stat + "-mid").value) || 0;
+        playerStats[stat] += val;
+      });
+			showStatsMid();
+      document.getElementById("mid-point-allocation-screen").classList.add("hidden");
+      document.getElementById("feedback-screen-mid").classList.remove("hidden"); // 進入第一題
+    }
+    
+    function showQuestionMid() {
+      document.getElementById("feedback-screen-mid").classList.add("hidden");
+      showQuestion(); // 進入第一題
+    }
+    
+    
+
     // 每階段題庫對應題數、年齡、年齡增長
     const stageConfig = [
       { pool: babyQuestionPool, count: 3, ageStart: 1, ageStep: 1},
@@ -1630,12 +1818,19 @@
         document.getElementById("stage-screen").classList.remove("hidden");
         document.getElementById("stage-title").textContent = `階段：${stageData.name}`;
         document.getElementById("stage-description").textContent = stageData.description;
+
       }
     }
     
     function startStage() {
       document.getElementById("stage-screen").classList.add("hidden");
-      showQuestion(); // 顯示階段第一題
+      // 青年或壯年開始時加入能力分配
+      if (currentStage === 1 || currentStage === 2) {
+        document.getElementById("stage-screen").classList.add("hidden");
+        showMidPointAllocation(); // 👉 顯示分配畫面
+      } else {
+      	showQuestion(); // 顯示階段第一題
+      }
     }
     
     function runElderSurvivalEvents(index = 0) { // 遞迴式的生存挑戰函式
