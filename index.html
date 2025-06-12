@@ -968,6 +968,38 @@
         condition: stats => stats.combat > 20,
         text: "你在與其他暴龍對峙後勝出，對方撤退，你的地位更加穩固。",
         effect: { independence: +10, combat: +5 }
+      },
+      {
+        id: "adultevent_dead_001",
+        triggerChance: 0.6,
+        condition: () => true,
+        deathCause: "遭翼龍捕食",
+        text: "你在森林裡尋找獵物，發現左邊有一隻安祖龍，右邊有一隻三角龍，前方有一隻阿拉摩龍。你要狩獵誰？",
+        isFatalChoiceEvent: true, // 用來辨識這是特殊有選項的致死事件
+        oncePerStage: true,
+        choices: [
+          {
+            text: "攻擊安祖龍",
+            //requirement: { safety: 12 },
+            successChance: 1,
+            successText: "你輕鬆擊倒了安祖龍，補充了能量。",
+            effect: { food: 10 }
+          },
+          {
+            text: "攻擊三角龍",
+            successChance: 0.5,
+            successText: "你成功擊倒了三角龍，獲得豐富的肉食與自信。",
+            effect: { food: 20, combat: 20 },
+            deathCause: "被三角龍群圍剿"
+          },
+          {
+            text: "攻擊阿拉摩龍",
+            successChance: 0.2,
+            successText: "你費盡力氣終於擊倒巨大的阿拉摩龍，飽食一頓！",
+            effect: { food: 40, combat: 40 },
+            deathCause: "被阿拉摩龍擊倒"
+          }
+        ]
       }
     ];
     
@@ -1195,8 +1227,7 @@
         weight: 0, // 初始體重
         food: 100,
         foodNeed: 80, // 幼年初始需求（可依階段變動）
-        intelligence: 50,
-        growth: 70,               
+        intelligence: 50,             
         ...values
       };
 
@@ -1409,9 +1440,18 @@
       } else {
         f = 0.4; // 食物嚴重不足（營養不良）
       }
-      
+      const prevLength = playerStats.length;
+      const prevWeight = playerStats.weight;
+
       playerStats.length = getIdealLength(age,f);
       playerStats.weight = getIdealWeight(age,f);
+      
+      const lengthDiff = playerStats.length - prevLength;
+      const weightDiff = playerStats.weight - prevWeight;
+
+      effect.length = Math.round(lengthDiff * 10) / 10;
+      effect.weight = Math.round(weightDiff * 10) / 10;
+
       
       // 顯示所有參數
       title.innerText = "總能力值";
@@ -1435,9 +1475,9 @@
           }
           
           if (key === "length") {
-            return `<li>體長：${rounded} 公尺</li>`;
+            return `<li class="${className}">體長：${rounded} 公尺${arrow}</li>`;
           } else if (key === "weight") {
-            return `<li>體重：${rounded} 公斤</li>`;
+            return `<li class="${className}">體重：${rounded} 公斤${arrow}</li>`;
           } else {
             return `<li class="${className}">${translateStatKey(key)}：${rounded}${arrow}</li>`;
           }
@@ -1462,7 +1502,6 @@
       const map = {
       	food: "食物儲備",
         intelligence: "智力",
-        growth: "成長速度",
         safety: "安全敏感",
         combat: "戰鬥力",
         independence: "獨立性",
@@ -1727,9 +1766,17 @@
       } else {
         f = 0.4; // 食物嚴重不足（營養不良）
       }
-      
+      const prevLength = playerStats.length;
+      const prevWeight = playerStats.weight;
+
       playerStats.length = getIdealLength(age,f);
       playerStats.weight = getIdealWeight(age,f);
+      
+      const lengthDiff = playerStats.length - prevLength;
+      const weightDiff = playerStats.weight - prevWeight;
+
+      effect.length = Math.round(lengthDiff * 10) / 10;
+      effect.weight = Math.round(weightDiff * 10) / 10;
       
       // 顯示所有參數
       title.innerText = "總能力值";
@@ -1753,9 +1800,9 @@
           }
           
           if (key === "length") {
-            return `<li>體長：${rounded} 公尺</li>`;
+            return `<li class="${className}">體長：${rounded} 公尺${arrow}</li>`;
           } else if (key === "weight") {
-            return `<li>體重：${rounded} 公斤</li>`;
+            return `<li class="${className}">體重：${rounded} 公斤${arrow}</li>`;
           } else {
             return `<li class="${className}">${translateStatKey(key)}：${rounded}${arrow}</li>`;
           }
@@ -1769,9 +1816,7 @@
       ids.forEach(stat => {
         const val = parseInt(document.getElementById(stat + "-mid").value) || 0;
         playerStats[stat] += val;
-        effect = {
-        ...event,
-        stat: val};
+        effect[stat] = val;
       });
       console.log(effect);
 			showStatsMid(effect);
@@ -1783,8 +1828,6 @@
       document.getElementById("feedback-screen-mid").classList.add("hidden");
       showQuestion(); // 進入第一題
     }
-    
-    
 
     // 每階段題庫對應題數、年齡、年齡增長
     const stageConfig = [
@@ -1917,6 +1960,19 @@
       	"遭翼龍捕食": format(`你試圖逃跑或躲藏，但翼龍早已盯上你。
         
         它從天而降，你未能逃離它的魔爪，成為了它的盤中餐……`),
+        
+        "被三角龍群圍剿": format(`你本以為那只是隻落單的三角龍，沒想到牠的同伴都在附近。
+        
+        在你發動攻擊的瞬間，數隻三角龍從兩側包夾而來，讓你無法脫身。
+        
+        這場狩獵最終變成了你的終章……`),
+        
+        "被阿拉摩龍擊倒": format(`阿拉摩龍的龐大身軀遠比你想像得更難對付。
+        
+        當你試圖逼近時，牠迅速揮動強壯的尾巴將你擊退。
+        
+        重傷的你無法再戰，靜靜倒下，結束了這場冒險……`),
+        
         "感官退化": format(`你未能察覺周圍威脅，感官退化最終讓你暴露在死亡面前。
         
         對環境的感知能力衰退，終究成了你的致命弱點`),
