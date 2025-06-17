@@ -223,7 +223,6 @@
       font-size: 1.5em;
       line-height: 1.6;
       margin-bottom: 1em;
-      text-align: middle;
     }
     #event-requirement {
       font-size: 1.5em;
@@ -306,7 +305,22 @@
       font-weight: bold;
     }
 
+    .mp-status {
+      font-weight: bold;
+      color: #3b82f6; /* 淺藍色，可自訂 */
+      margin-top: -0.5em;
+      margin-bottom: 1em;
+    }
     
+    .rainbow {
+      font-weight: bold;
+      background: linear-gradient(270deg, red, orange, yellow, green, blue, indigo, violet, red);
+      background-size: 400% 400%;
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      animation: rainbow 2s ease infinite;
+    }
+
     
   </style>
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC&display=swap" rel="stylesheet">
@@ -321,8 +335,8 @@
       <h5>寫下屬於暴龍的傳奇！</h5>
       <h3>🔍 遊戲說明</h3>
       <p>🌌 <strong>背景故事</strong><br>你將成為一隻暴龍，從幼年一路進化，歷經掠食、社交、爭地盤與老年風險，每一步都會改變你的命運。</p>
-      <p>🧠 <strong>玩法簡介</strong><br>分配你的初始能力點數，根據每階段的選擇（部分選項須能力達到一定值才能選擇）與隨機觸發事件影響你的最終結果。每次遊戲可能導致截然不同的結局。</p>
-      <p>🏆 <strong>目標與結局</strong><br>遊戲結束後，將根據你的各項能力值給予不同的評語與稱號。你能活到老年？稱霸地獄溪層？還是早早變成食物？</p>
+      <p>🧠 <strong>玩法簡介</strong><br>分配你的初始能力點數，每次選擇的行動都將消耗或獲得一定的體力，並根據不同選擇（部分選項須能力達到一定值才能選擇）與隨機觸發事件影響你的最終結果。每次遊戲可能導致截然不同的結局。</p>
+      <p>🏆 <strong>目標與結局</strong><br>遊戲結束後，會顯示你的各項能力值。你能活到最後？還是早早變成食物？</p>
     </div>
     <button onclick="startGame()">開始「龍」生</button>
   </div>
@@ -362,6 +376,7 @@
   <!-- 問題頁 -->
   <div id="question-screen" class="hidden">
     <h2 id="question-title"></h2>
+    <p id="question-mp" class="mp-status"></p>
     <p style="text-align: justify;" id="question-text"></p>
     <div id="options-container"></div>
     <div id="EffectText" class="option-hint hidden"></div>
@@ -381,8 +396,10 @@
   <!-- 隨機事件頁 -->
   <div id="event-screen" class="hidden">
     <h3 id="event-title">你遭遇了突發事件！</h3>
-    <p id="event-text"></p>
-    <p id="event-requirement"></p>   
+    <p id="event-mp" class="mp-status"></p>
+    <p id="event-text"></p> 
+    <p id="event-textContent"></p>
+    <p id="event-requirement"></p>
     <div id="event-choices"></div>    
     <p id="event-effect" class="option-hint hidden"></p>
     <button id="event-continue-1">繼續</button>
@@ -602,7 +619,7 @@
       {
         id: "babyevent_002",
         triggerChance: 0.4,
-        condition: (stats) => stats.independence > 15, // 獨立性大於20有可能發生
+        condition: (stats) => stats.independence > 10, // 獨立性大於10有可能發生
         text: "你偷偷溜出巢穴，但在附近滑倒跌了一跤。",
         mpCost: 30,
         effect: { stamina: -10, independence: +5 }
@@ -650,14 +667,14 @@
               if (i >= 15) return 0.25;
               return 0.1;
             },
-            successText: "你拔腿狂奔，在翼龍抓到你之前驚險地衝回了巢穴，但你的兄弟姐就沒那麼好運了……",
+            successText: "你拔腿狂奔，在翼龍抓到你之前驚險地衝回了巢穴，但你的兄弟姐妹就沒那麼好運了……",
             deathCause: "遭翼龍捕食"
           },
           {
             text: "大聲呼叫媽媽",
             mpCost: 30,
             effect: {},
-            successChance: 0.3,
+            successChance: 0.15,
             successText: "你發出一連串尖細而急促的呼叫聲，遠處的媽媽聽到你的呼救在你們被翼龍抓到前出現並趕走了翼龍。",
             deathCause: "遭翼龍捕食"
           }
@@ -685,7 +702,7 @@
             text: "先觀察牠有無群體保護再決定是否出擊",
             mpCost: 0,
             effect: { intelligence: 10, combat: 5, sense: 5 },
-            requirement: { intelligence: 55 }
+            requirement: { intelligence: 35 }
           },
           {
             text: "轉身離開，避免暴露自己位置",
@@ -704,7 +721,7 @@
             text: "搶先咬住肉塊佔領優勢",
             mpCost: 20,
             effect: { food: 10, combat: 10, stamina: -10 },
-            requirement: { combat: 25 }
+            requirement: { combat: 20 }
           },
           {
             text: "轉向其他兄弟姊妹發出警告聲",
@@ -734,7 +751,7 @@
             text: "走進森林找陰涼處休息",
             mpCost: 10,
             effect: { food: -10, stamina: 5, intelligence: 5 },
-            requirement: { intelligence: 45 }
+            requirement: { intelligence: 25 }
           },
           {
             text: "跳進水中降溫",
@@ -774,7 +791,7 @@
             text: "設下伏擊路線，等待時機",
             mpCost: 10,
             effect: { food: 5, intelligence: 10, stamina: 5, combat: 5 },
-            requirement: { intelligence: 60 }
+            requirement: { intelligence: 30 }
           },
           {
             text: "選擇不浪費體力追逐",
@@ -798,18 +815,18 @@
             text: "留下與牠對峙，試圖嚇退對方",
             mpCost: 10,
             effect: { combat: 5, stamina: -10, food: -5 },
-            requirement: { combat: 35 }
+            requirement: { combat: 30 }
           },
           {
             text: "試圖引誘牠離開主戰區再反擊",
             effect: { intelligence: 10, combat: 5, sense: 5 },
-            requirement: { intelligence: 60 }
+            requirement: { intelligence: 30 }
           },
           {
             text: "將鼻部傷口塗上泥土避免感染",
             mpGain: 10,
             effect: { intelligence: 10, food: -10 },
-            requirement: { intelligence: 65 }
+            requirement: { intelligence: 35 }
           }
         ],
         knowledge: "電影中出現青年暴龍鼻部受傷情節，推測為同類競爭的結果。",
@@ -824,7 +841,7 @@
             text: "嘗試佔領並巡邏",
             mpCost: 20,
             effect: { food: -20, independence: 10, combat: 10 },
-            requirement: { independence: 45 }
+            requirement: { independence: 25 }
           },
           {
             text: "先留意幾天是否有敵人活動",
@@ -1097,6 +1114,7 @@
       {
         id: "adultevent_006",
         triggerChance: 0.9,
+        condition: () => true,
         oncePerStage: true,
         text: "你注意到附近出現了一隻成熟異性暴龍，牠也發現了你，你會？",
         choices: [
@@ -1111,6 +1129,7 @@
               return 0.2;
             },
             successText: "你霸氣現身，沒想到對方竟停下腳步凝視你。恐龍界的愛情，從一聲咆哮開始。",
+            failText: "你展示了氣勢，但對方不為所動，轉身離開。你只得默默離去，回到狩獵生活。",
             effect: { mate: true },
             requirement: { independence: 40 }
           },
@@ -1129,7 +1148,7 @@
       {
         id: "adultevent_007",
         triggerChance: 0.9,
-        condition: stats => stats.child === true,
+        condition: stats => stats.mate === true,
         oncePerStage: true,
         text: "配偶與你一同尋找適合築巢的地點，你打算選擇哪個地點？",
         choices: [
@@ -1337,18 +1356,18 @@
         triggerChance: 0.7,
         condition: stats => stats.intelligence >= 55,
         requirementKey: "intelligence",
-				requirementMin: 55,
+				requirementMin: 30,
         deathCause: "應變不足",
         text: "突然下起大雨，地面變得泥濘，你必須立刻判斷撤離路線。",
         oncePerStage: true
       },
       {
         id: "elderevent_004",
-        triggerChance: 1,
+        triggerChance: 0.7,
         condition: stats => stats.weight >= 8500 && stats.length >= 12,
 				requirementText: "體重 ≥ 8500 公斤，且 體長 ≥ 12 公尺",
         deathCause: "體型不足",
-        text: "你在一處水源地遇到另一隻成年暴龍，它慢慢逼近試圖驅逐你。",
+        text: "你在一處水源地遇到另一隻成年暴龍，它慢慢逼近你。",
         oncePerStage: true
       }
     ];
@@ -1502,7 +1521,7 @@
       const stageNames = ["幼年", "青年", "壯年", "老年"];
       const stageName = stageNames[currentStage];
       document.getElementById("question-title").textContent = `${stageName}：${age} 歲`;
-      
+      document.getElementById("question-mp").textContent = `體力：${Math.round(playerStats.mp)}/100`;
       document.getElementById("question-text").textContent = q.title;
 
       const optionsContainer = document.getElementById("options-container");
@@ -1681,6 +1700,8 @@
       
       // 顯示所有參數
       title.innerText = "總能力值";
+      const mateLine = `<li${playerStats.mate ? ' class="rainbow"' : ''}>配偶狀態：${playerStats.mate ? '有配偶' : '無配偶'}</li>`;
+      const childLine = `<li${playerStats.child ? ' class="rainbow"' : ''}>後代狀態：${playerStats.child ? "有後代" : "無後代"}</li>`;
       const keysToSkip = ["mate", "child"];
       const formattedStats = Object.entries(playerStats)
         .filter(([key]) => !keysToSkip.includes(key))  // 排除 mate/child
@@ -1692,10 +1713,10 @@
           if (effect.hasOwnProperty(key)) {
             const delta = effect[key];
             if (delta > 0) {
-              arrow = " ▲";
+              arrow = " ⭡";//▲";
               className = "param-up";
             } else if (delta < 0) {
-              arrow = " ▼";
+              arrow = " ⭣";//"▼";
               className = "param-down";
             }
           }
@@ -1710,8 +1731,8 @@
         });
 
       // 補上配偶與子女狀態
-      formattedStats.push(`<li>配偶狀態：${playerStats.mate ? "有配偶" : "無配偶"}</li>`);
-      formattedStats.push(`<li>子女狀態：${playerStats.child ? "有後代" : "無後代"}</li>`);
+      formattedStats.push(mateLine);
+      formattedStats.push(childLine);
 
       area.innerHTML = `<ul style="list-style-type: none; padding-left: 0;">` + `<li>年齡：${age} 歲</li>` + `${formattedStats.join("")}</ul>`;
     }
@@ -1734,7 +1755,6 @@
       	food: "食物儲備",
         intelligence: "智力",
         mp:"體力",
-        stamina: "耐力",
         stamina: "耐力",
         combat: "戰鬥力",
         independence: "獨立性",
@@ -1762,7 +1782,9 @@
       const availableEvents = currentRandomEvents.filter(event => {
         const alreadyTriggered = triggeredEventIds.has(event.id);
         const shouldTrigger = Math.random() < event.triggerChance;
-        return shouldTrigger && (!event.oncePerStage || !alreadyTriggered);
+        // 若沒有 condition，就預設為 true
+        const conditionPassed = !event.condition || event.condition(playerStats);
+        return shouldTrigger && conditionPassed && (!event.oncePerStage || !alreadyTriggered);
       });
       
       for (const event of availableEvents) {
@@ -1786,7 +1808,8 @@
     function showEventOnly() {
       document.getElementById("event-screen").classList.remove("hidden");
       document.getElementById("event-text").textContent = pendingEvent.text;
-      
+      document.getElementById("event-mp").textContent = `體力：${Math.round(playerStats.mp)}/100`;
+
       // 隱藏選項區塊（避免空白）
       document.getElementById("event-choices").classList.add("hidden");
       // 顯示"繼續"按鈕與其他回饋用元素
@@ -1811,10 +1834,11 @@
     
     // 有選項的致死隨機事件
     function showFatalEventWithChoices(event) {
-
       document.getElementById("event-screen").classList.remove("hidden");
-      document.getElementById("event-text").textContent = event.text;
-      document.getElementById("event-requirement").textContent = "你要怎麼做？";
+      document.getElementById("event-mp").textContent = `體力：${Math.round(playerStats.mp)}/100`;
+      if (event.text) {
+      	document.getElementById("event-text").textContent = event.text;
+      }
 
       // 隱藏"繼續"按鈕與其他回饋用元素
       document.getElementById("event-effect").classList.add("hidden");
@@ -1868,8 +1892,19 @@
 
             const survived = Math.random() < chance;
             if (!survived) {
-            	document.getElementById("event-screen").classList.add("hidden");
-              showEndingByDeath(choice.deathCause);
+            	if (choice.failText) {
+                // 有失敗文字 → 顯示後繼續遊戲
+                pendingEvent = {
+                  ...event,
+                  text1: choice.failText,
+                  effect: {}
+                };
+                continueAfterEvent_1();
+              } else {
+                // 沒 failText 就照原本邏輯 → 可能是致死事件
+                document.getElementById("event-screen").classList.add("hidden");
+                showEndingByDeath(choice.deathCause);
+              }
             } else {
               // 生還處理
               pendingEvent = {
@@ -1877,6 +1912,9 @@
                 text1: choice.successText || `你${choice.text}，成功存活下來。`,
                 effect: {}
               };
+              // 套用能力變動
+              applyEffect(choice.effect || {});
+              
               showStats(choice.effect)
               continueAfterEvent_1();
             }
@@ -1938,7 +1976,7 @@
           }
         }, 1000);
 
-      }, 2000);
+      }, 2500);
     }
     // 階段中分配------------------------------------------------------------------------------------------------
     function showMidPointAllocation() {
@@ -2027,6 +2065,8 @@
       
       // 顯示所有參數
       title.innerText = "總能力值";
+      const mateLine = `<li${playerStats.mate ? ' class="rainbow"' : ''}>配偶狀態：${playerStats.mate ? "有配偶" : "無配偶"}</li>`;
+      const childLine = `<li${playerStats.child ? ' class="rainbow"' : ''}>後代狀態：${playerStats.child ? "有後代" : "無後代"}</li>`;
       const keysToSkip = ["mate", "child"];
       const formattedStats = Object.entries(playerStats)
         .filter(([key]) => !keysToSkip.includes(key)) // 排除 mate 與 child
@@ -2038,10 +2078,10 @@
           if (effect.hasOwnProperty(key)) {
             const delta = effect[key];
             if (delta > 0) {
-              arrow = " ▲";
+              arrow = " ⭡";//▲";
               className = "param-up";
             } else if (delta < 0) {
-              arrow = " ▼";
+              arrow = " ⭣";//▼";
               className = "param-down";
             }
           }
@@ -2056,8 +2096,8 @@
         });
 
       // ✅ 補上配偶與子女狀態（最下方）
-      formattedStats.push(`<li>配偶狀態：${playerStats.mate ? "有配偶" : "無配偶"}</li>`);
-      formattedStats.push(`<li>子女狀態：${playerStats.child ? "有後代" : "無後代"}</li>`);
+      formattedStats.push(mateLine);
+      formattedStats.push(childLine);
 
       area.innerHTML = `<ul style="list-style-type: none; padding-left: 0;">` + `<li>年齡：${age} 歲</li>` + `${formattedStats.join("")}</ul>`;
     }
@@ -2079,13 +2119,13 @@
       document.getElementById("feedback-screen-mid").classList.add("hidden");
       showQuestion() // ✅ 自動進入下一題或結尾
     }
-
-    // 每階段題庫對應題數、年齡、年齡增長
+    
+    // 每階段題庫對應題數、年齡、年齡增長--------------------------------------------------------
     const stageConfig = [
       { pool: babyQuestionPool, count: 3, ageStart: 1, ageStep: 1},
       { pool: teenQuestionPool, count: 3, ageStart: 5, ageStep: 2},
       { pool: adultQuestionPool, count: 5, ageStart: 12, ageStep: 2},
-      { pool: elderQuestionPool, count: 2, ageStart: 22, ageStep: 1}
+      { pool: elderQuestionPool, count: 3, ageStart: 22, ageStep: 1}
     ];
     // 開始該階段前的知識補充
     const stageInfo = [
@@ -2110,12 +2150,12 @@
 
     function nextQuestion() {
       document.getElementById("feedback-screen").classList.add("hidden");
-			if (currentStage !== 3) { // 房與老年題庫結束前觸發致死隨機事件
+			if (currentStage !== 3) { // 防止老年題庫結束前觸發致死隨機事件
         const triggered = maybeTriggerRandomEvent();
-        if (triggered && pendingEvent.isFatalChoiceEvent) {
+        if (triggered && pendingEvent.choices.length > 0) {
           showFatalEventWithChoices(pendingEvent);
           return;
-        } else if (triggered && !pendingEvent.isFatalChoiceEvent) {        	
+        } else if (triggered && !pendingEvent.choices.length > 0) {        	
           showEventOnly(); // 👇 先顯示事件本身（暫不處理能力值變動）
           prepareContinueAfterEvent(null); // 不會做遞迴
           return;
@@ -2259,25 +2299,32 @@
     	document.getElementById("ending-screen").classList.add("hidden");
       document.getElementById("result-screen").classList.remove("hidden");
       
+      const isMeteor = causeOfDeath === "隕石撞地球";
+      const causeLine = `<li${isMeteor ? ' class="rainbow"' : ''}>死因：${causeOfDeath}</li>`;
+      const mateLine = `<li${playerStats.mate ? ' class="rainbow"' : ''}>配偶狀態：${playerStats.mate ? "有配偶" : "無配偶"}</li>`;;
+      const childLine = `<li${playerStats.child ? ' class="rainbow"' : ''}>後代狀態：${playerStats.child ? "有後代" : "無後代"}</li>`;
+      
       const area_f = document.getElementById("final-text");
       const title_f = document.getElementById("final-title");
       title_f.innerText = "你的各項能力值";
+      const keysToSkip = ["mate", "child"];
       area_f.innerHTML = `<ul style="list-style-type: none; padding-left: 0;">` +
-      	`<li>死因：${causeOfDeath}</li>` +
+      	causeLine +
       	`<li>年齡：${age} 歲</li>` +
-        Object.entries(playerStats).map(([key, val]) => {
+        Object.entries(playerStats)
+        .filter(([key]) => !keysToSkip.includes(key))  // 排除 mate/child
+        .map(([key, val]) => {
           if (key === "length") {
             return `<li>體長：${Math.round(val * 10) / 10} 公尺</li>`;
           } else if (key === "weight") {
             return `<li>體重：${Math.round(val * 10) / 10} 公斤</li>`;
           } else {
             return `<li>${translateStatKey(key)}：${Math.round(val * 10) / 10}</li>`;
-            return `<li>配偶狀態：${playerStats.mate ? "有配偶" : "無配偶"}</li>`;
           }
-        }).join("") +
-        `<li>配偶狀態：${playerStats.mate ? "有配偶" : "無配偶"}</li>` +
-        `<li>後代狀態：${playerStats.child ? "有後代" : "無後代"}</li>`
-        "</ul>";
+        }).join("") + 
+        mateLine +
+        childLine +
+        `</ul>`;
     }
 
     function restartGame() {
