@@ -16,7 +16,7 @@
     .container {
       max-width: 700px;
       margin: auto;
-      background: rgba(0,0,0,0.7);
+      background: rgba(0,0,0,0.9);
       border-radius: 15px;
       padding: 2em;
       box-shadow: 0 0 20px rgba(255,255,255,0.1);
@@ -465,23 +465,23 @@
           {
             text: "馬上發出叫聲求救",
             mpCost: 5,
-            effect: { intelligence: 10 },
+            effect: { intelligence: 12 },
             requirement: { sense: 10 }
           },
           {
             text: "躲進巢穴深處",
             mpCost: 10,
-            effect: { stamina: 5, intelligence: 5 }
+            effect: { stamina: 7, intelligence: 7 }
           },
           {
             text: "探頭觀察發生什麼事",
             mpCost: 0,
-            effect: { intelligence: -10, sense: 5 }
+            effect: { intelligence: -7, sense: 5 }
           },
           {
             text: "嘗試發出威嚇聲",
             mpCost: 0,
-            effect: { independence: 5, combat: 5 },
+            effect: { independence: 7, combat: 7 },
             requirement: { combat: 10 }
           }
         ],
@@ -495,23 +495,23 @@
           {
             text: "躲到乾燥角落",
             mpCost: 10,
-            effect: { stamina: 5 }
+            effect: { stamina: 10 }
           },
           {
             text: "嘗試自己離開巢穴尋找新棲地",
             mpCost: 20,
-            effect: { stamina: -10, independence: 10 },
+            effect: { stamina: -7, independence: 10 },
             requirement: { independence: 10 }
           },
           {
             text: "等待父母帶領撤退",
             mpGain: 5,
-            effect: { intelligence: 5 }
+            effect: { intelligence: 7 }
           },
           {
             text: "開始大聲尖叫",
             mpCost: 10,
-            effect: { sense: 5, intelligence: -5 }
+            effect: { sense: 7, intelligence: -5 }
           }
         ],
         knowledge: "幼年暴龍常生活在群體巢穴中，面臨環境劇變時需要依靠本能與照顧者反應。",
@@ -529,7 +529,7 @@
           {
             text: "發出低鳴試圖嚇走牠",
             mpCost: 10,
-            effect: { combat: 5, intelligence: -5 },
+            effect: { combat: 7, intelligence: -5 },
             requirement: { combat: 8 }
           },
           {
@@ -541,7 +541,7 @@
           {
             text: "立刻跑回家人身邊",
             mpCost: 20,
-            effect: { stamina: 10, independence: -5 }
+            effect: { stamina: 12, independence: -5 }
           }
         ],
         knowledge: "感官發展與社交反應是暴龍幼年期的重要學習階段。",
@@ -554,7 +554,7 @@
           {
             text: "乖乖等候分食",
             mpCost: 0,
-            effect: { food: 5 }
+            effect: { food: 7 }
           },
           {
             text: "搶先上前咬住肉",
@@ -593,7 +593,7 @@
           {
             text: "呼喚其他家人提醒他們注意",
             mpCost: 10,
-            effect: { sense: 5, independence: 5 }
+            effect: { sense: 7, independence: 7 }
           },
           {
             text: "嘗試自己尋找氣味來源",
@@ -614,7 +614,7 @@
         condition: () => true, 
         text: "你在睡夢中被蛇形生物驚醒，牠正悄悄爬向巢穴。",
         mpCost: 20,
-        effect: { stamina: -5, sense: +5 }
+        effect: { stamina: -5, sense: -5 }
       },
       {
         id: "babyevent_002",
@@ -622,7 +622,7 @@
         condition: (stats) => stats.independence > 10, // 獨立性大於10有可能發生
         text: "你偷偷溜出巢穴，但在附近滑倒跌了一跤。",
         mpCost: 30,
-        effect: { stamina: -10, independence: +5 }
+        effect: { stamina: -10, independence: 5 }
       },
       {
         id: "babyevent_003",
@@ -630,7 +630,7 @@
         condition: () => true,
         text: "母親帶回來一塊腐肉，你搶先吃到一口！",
         mpGain: 20,
-        effect: { food: +10, stamina: +5 }
+        effect: { food: 10, stamina: 5 }
       },
       {
         id: "babyevent_dead_001",
@@ -663,8 +663,8 @@
             effect: {},
             successChance: stats => {
               const i = stats.stamina || 0;
-              if (i >= 30) return 0.4;
-              if (i >= 15) return 0.25;
+              if (i >= 30) return 0.6;
+              if (i >= 15) return 0.4;
               return 0.1;
             },
             successText: "你拔腿狂奔，在翼龍抓到你之前驚險地衝回了巢穴，但你的兄弟姐妹就沒那麼好運了……",
@@ -674,8 +674,8 @@
             text: "大聲呼叫媽媽",
             mpCost: 30,
             effect: {},
-            successChance: 0.15,
-            successText: "你發出一連串尖細而急促的呼叫聲，遠處的媽媽聽到你的呼救在你們被翼龍抓到前出現並趕走了翼龍。",
+            successChance: 0.2,
+            successText: "你發出一連串尖細而急促的呼叫聲，遠處的媽媽聽到你的呼救後在你們被翼龍抓到前出現，趕走了翼龍。",
             deathCause: "遭翼龍捕食"
           }
         ]
@@ -707,7 +707,7 @@
           {
             text: "轉身離開，避免暴露自己位置",
             mpGain: 10,
-            effect: { food: -10 }
+            effect: { food: -10, combat: -5 }
           }
         ],
         knowledge: "青年暴龍擁有極高代謝需求，狩獵行為從此階段開始逐漸獨立。",
@@ -720,13 +720,13 @@
           {
             text: "搶先咬住肉塊佔領優勢",
             mpCost: 20,
-            effect: { food: 10, combat: 10, stamina: -10 },
+            effect: { food: 10, combat: 10, stamina: -10, sense: -7 },
             requirement: { combat: 20 }
           },
           {
             text: "轉向其他兄弟姊妹發出警告聲",
             mpCost: 15,
-            effect: { food: 5, independence: 10, combat: 5 },
+            effect: { food: 5, independence: 10, combat: 5, sense: -5 },
             requirement: { independence: 25 }
           },
           {
@@ -756,7 +756,7 @@
           {
             text: "跳進水中降溫",
             mpCost: 20,
-            effect: { food: -10, stamina: 5, sense: 5, intelligence: 10 }
+            effect: { food: -10, stamina: 5, intelligence: 10 }
           },
           {
             text: "堅持活動，繼續尋找食物",
@@ -809,12 +809,12 @@
           {
             text: "立刻撤退並尋找休息地點",
             mpGain: 20,
-            effect: { stamina: 10, food: -10, combat: -5 }
+            effect: { stamina: 10, food: -10, combat: -5, sense: -5 }
           },
           {
             text: "留下與牠對峙，試圖嚇退對方",
             mpCost: 10,
-            effect: { combat: 5, stamina: -10, food: -5 },
+            effect: { combat: 5, stamina: -10, food: -5, sense: -5 },
             requirement: { combat: 30 }
           },
           {
@@ -825,7 +825,7 @@
           {
             text: "將鼻部傷口塗上泥土避免感染",
             mpGain: 10,
-            effect: { intelligence: 10, food: -10 },
+            effect: { intelligence: 10, food: -10, sense: -5 },
             requirement: { intelligence: 35 }
           }
         ],
@@ -846,7 +846,7 @@
           {
             text: "先留意幾天是否有敵人活動",
             mpCost: 10,
-            effect: { food: -10, sense: 10 }
+            effect: { food: -10, sense: 10, intelligence: 10 }
           },
           {
             text: "離開這裡，尋找其他恐龍",
@@ -865,7 +865,7 @@
         triggerChance: 0.3, // 30% 機率觸發
         condition: (stats) => stats.food < 100, // 觸發條件
         text: "你在森林中發現一具被啃咬過的大型恐龍屍體。",
-        effect: { food: +20, stamina: +5 }
+        effect: { food: +20, stamina: +5, sense: 5 }
       },
       {
         id: "teenevent_002",
@@ -877,7 +877,7 @@
       {
         id: "teenevent_003",
         triggerChance: 0.2,
-        condition: stats => stats.stamina < 15,
+        condition: stats => stats.semse < 15,
         text: "你在追逐獵物時踩到尖刺植物，腳掌受傷行動變慢。",
         effect: { stamina: -15, combat: -15 }
       },
@@ -891,16 +891,16 @@
       {
         id: "teenevent_005",
         triggerChance: 0.3,
-        condition: stats => stats.intelligence > 60,
+        condition: stats => stats.intelligence > 50,
         text: "你偷偷從成年暴龍遺下的屍體中叼走一些肉塊。",
-        effect: { food: +20, stamina: +10 }
+        effect: { food: 20, stamina: 10 }
       },
       {
         id: "teenevent_006",
         triggerChance: 0.2,
         condition: stats => stats.sense > 25,
         text: "你用敏銳的嗅覺發現一個草食恐龍巢穴，趁虛而入。",
-        effect: { food: +20, sense: +10 }
+        effect: { food: 20, stamina: 10 }
       }
     ];
 
@@ -1336,7 +1336,7 @@
         triggerChance: 1.0, // ✅ 必定觸發
         condition: stats => stats.sense >= 15, // 通過條件
         requirementKey: "sense", // 畫面顯示的通關條件
-				requirementMin: 15, // 畫面顯示的通關條件
+				requirementMin: 25, // 畫面顯示的通關條件
         deathCause: "感官退化",
         text: "你在夜間獨自行動，周圍傳來細微的聲響與氣味變化。",
         oncePerStage: true
