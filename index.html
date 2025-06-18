@@ -644,7 +644,7 @@
           {
             text: "躲起來",
             mpCost: 0,
-            requirement: { intelligence: 25 },
+            requirement: { intelligence: 15 },
             effect: {},
             successChance: stats => {
               const i = stats.intelligence || 0;
@@ -663,7 +663,7 @@
             effect: {},
             successChance: stats => {
               const i = stats.stamina || 0;
-              if (i >= 30) return 0.6;
+              if (i >= 30) return 0.7;
               if (i >= 15) return 0.4;
               return 0.1;
             },
@@ -863,23 +863,23 @@
       {
         id: "teenevent_001",
         triggerChance: 0.3, // 30% 機率觸發
-        condition: (stats) => stats.food < 100, // 觸發條件
+        condition: () => true, // 觸發條件
         text: "你在森林中發現一具被啃咬過的大型恐龍屍體。",
-        effect: { food: +20, stamina: +5, sense: 5 }
+        effect: { food: 20, stamina: 5, sense: 5 }
       },
       {
         id: "teenevent_002",
         triggerChance: 0.3,
-        condition: stats => stats.food < 100,
+        condition: () => true,
         text: "你突然感到強烈飢餓，暴龍的高代謝讓你必須立刻進食。",
         effect: { food: -30, stamina: -5}
       },
       {
         id: "teenevent_003",
         triggerChance: 0.2,
-        condition: stats => stats.semse < 15,
+        condition: () => true,
         text: "你在追逐獵物時踩到尖刺植物，腳掌受傷行動變慢。",
-        effect: { stamina: -15, combat: -15 }
+        effect: { stamina: -10, combat: -10 }
       },
       {
         id: "teenevent_004",
@@ -890,15 +890,15 @@
       },
       {
         id: "teenevent_005",
-        triggerChance: 0.3,
-        condition: stats => stats.intelligence > 50,
+        triggerChance: 0.5,
+        condition: stats => stats.intelligence > 35,
         text: "你偷偷從成年暴龍遺下的屍體中叼走一些肉塊。",
         effect: { food: 20, stamina: 10 }
       },
       {
         id: "teenevent_006",
-        triggerChance: 0.2,
-        condition: stats => stats.sense > 25,
+        triggerChance: 0.5,
+        condition: stats => stats.sense > 15,
         text: "你用敏銳的嗅覺發現一個草食恐龍巢穴，趁虛而入。",
         effect: { food: 20, stamina: 10 }
       }
@@ -1004,7 +1004,7 @@
       },
       {
         id: "adult_005",
-        title: "一隻暴龍幼體闖入你領地，看起來脫隊且驚慌失措。",
+        title: "一隻暴龍幼龍闖入你領地，看起來脫隊且驚慌失措。",
         options: [
           {
             text: "將牠趕走，維護地盤完整性",
@@ -1079,37 +1079,37 @@
       {
         id: "adultevent_001",
         triggerChance: 0.3,
-        condition: stats => stats.independence > 20,
+        condition: stats => stats.sense > 20,
         text: "你在領地邊界發現其他暴龍留下的新鮮氣味，你本能地加強巡邏與防備。",
-        effect: { stamina: +5, independence: +5 }
+        effect: { stamina: 5, independence: 10 }
       },
       {
         id: "adultevent_002",
-        triggerChance: 0.25,
-        condition: stats => stats.food < 100,
+        triggerChance: 0.3,
+        condition: () => true,
         text: "你在夜間聽到獵物聲音，迅速行動並咬死一隻奔跑中的禽龍。",
-        effect: { food: +20}
+        effect: { food: 20}
       },
       {
         id: "adultevent_003",
         triggerChance: 0.2,
-        condition: stats => stats.stamina < 15,
+        condition: stats => stats.stamina < 25,
         text: "你在追擊一群小型恐龍時不慎摔落小坡，膝部擦傷行動受限。",
-        effect: { stamina: -10, combat: -5 }
+        effect: { stamina: -5, combat: -5 }
       },
       {
         id: "adultevent_004",
-        triggerChance: 0.15,
-        condition: stats => stats.intelligence > 60,
+        triggerChance: 0.3,
+        condition: stats => stats.intelligence > 40,
         text: "你利用地形製造聲音假訊號，成功將其他掠食者引開後進食。",
-        effect: { food: +15, stamina: +10 }
+        effect: { food: 15, stamina: 10 }
       },
       {
         id: "adultevent_005",
-        triggerChance: 0.25,
+        triggerChance: 0.3,
         condition: stats => stats.combat > 20,
         text: "你在與其他暴龍對峙後勝出，對方撤退，你的地位更加穩固。",
-        effect: { independence: +10, combat: +5 }
+        effect: { independence: 10, combat: 5 }
       },
       {
         id: "adultevent_006",
@@ -1124,8 +1124,8 @@
             successChance: stats => {
               const i = stats.combat || 0;
               if (i >= 50) return 0.8;
-              if (i >= 35) return 0.6;
-              if (i >= 20) return 0.4;
+              if (i >= 40) return 0.6;
+              if (i >= 30) return 0.4;
               return 0.2;
             },
             successText: "你霸氣現身，沒想到對方竟停下腳步凝視你。恐龍界的愛情，從一聲咆哮開始。",
@@ -1136,41 +1136,45 @@
           {
             text: "不理會牠，繼續狩獵",
             mpCost: 0,
+            successChance: 1,
             effect: { food: -10, sense: 5 }
           },
           {
             text: "遠遠觀察牠的動向",
             mpGain: 20,
+            successChance: 1,
             effect: { stamina: 10, food: -20, independence: -10 }
           }
         ]
       },
       {
         id: "adultevent_007",
-        triggerChance: 0.9,
-        condition: stats => stats.mate === true,
-        oncePerStage: true,
+        triggerChance: 0.7,
+        condition: stats => !!stats.mate, // 只要不是 0、null、undefined、false
         text: "配偶與你一同尋找適合築巢的地點，你打算選擇哪個地點？",
         choices: [
           {
             text: "河邊林地",
             mpCost: 0,
-            successChance: 1,
+            successChance: 0.4,
             successText: "有食物但危險多，你們在水聲中迎來了第一窩恐龍寶寶。",
+            failText: "河水泛濫淹沒了巢穴，寶寶還沒孵化就被沖走，你們只得黯然離去。",
             effect: { child: true }
           },
           {
             text: "高地草原",
             mpCost: 0,
-            successChance: 1,
+            successChance: 0.5,
             successText: "地勢險峻但視野佳，你們在風中守著孵化中的蛋，等待新生命破殼而出。",
+            failText: "高地視野遼闊，卻也暴露無遺。掠食者趁你不備，摧毀了蛋巢。",
             effect: { child: true }
           },
           {
             text: "密林深處",
             mpCost: 0,
-            successChance: 1,
-            successText: "風險低但食物少，你們在藤蔓間築巢，靜靜迎接下一代的誕生。",
+            successChance: 0.6,
+            successText: "風險低但食物少，你們在藤密林中一處隱蔽的空地築巢，靜靜迎接下一代的誕生。",
+            failText: "森林深處太過貧瘠，你們無法找到足夠的食物，最終只得放棄這處巢穴。",
             effect: { child: true }
           }
         ]
@@ -1179,7 +1183,6 @@
         id: "adultevent_dead_001",
         triggerChance: 0.6,
         condition: () => true,
-        deathCause: "遭翼龍捕食",
         text: "你在森林裡尋找獵物，發現左邊有一隻安祖龍，右邊有一隻三角龍，前方有一隻阿拉摩龍。你要狩獵誰？",
         isFatalChoiceEvent: true, // 用來辨識這是特殊有選項的致死事件
         oncePerStage: true,
@@ -1231,7 +1234,7 @@
           {
             text: "花時間分析風向與氣味",
             mpCost: 0,
-            effect: { sense: +5, food: +5 },
+            effect: { sense: 5, food: 5 },
             requirement: { intelligence: 60 }
           },
           {
@@ -1242,7 +1245,7 @@
           {
             text: "直接衝往一個方向碰碰運氣",
             mpCost: 10,
-            effect: { food: +10, stamina: -10, intelligence: -15 },
+            effect: { food: 10, stamina: -10, intelligence: -15 },
             requirement: { independence: 15 }
           }
         ],
@@ -1256,18 +1259,18 @@
           {
             text: "主動咆哮試圖嚇退對方",
             mpCost: 20,
-            effect: { independence: +10, stamina: -5, food: +10 },
+            effect: { independence: 10, stamina: -5, food: 10 },
             requirement: { combat: 40 }
           },
           {
             text: "假裝沒看到，讓對方先喝完",
             mpGain: 10,
-            effect: { stamina: +10, independence: -10, food: -10 }
+            effect: { stamina: 10, independence: -10, food: -10 }
           },
           {
             text: "觀察對方行動後悄悄繞過",
             mpGain: 5,
-            effect: { sense: +5, independence: -5, food: -5 }
+            effect: { sense: 5, independence: -5, food: -5 }
           }
         ],
         knowledge: "老年暴龍傾向避戰，但不代表完全失去地位與威脅性。",
@@ -1280,18 +1283,18 @@
           {
             text: "迅速搶食再逃跑",
             mpCost: 20,
-            effect: { food: +15, stamina: -10 },
+            effect: { food: 15, stamina: -10 },
             requirement: { combat: 18 }
           },
           {
             text: "靜靜躲藏觀察是否安全",
             mpCost: 0,
-            effect: { stamina: +10, food: +5 }
+            effect: { stamina: 10, food: +5 }
           },
           {
             text: "轉身離開，避免多生事端",
             mpGain: 10,
-            effect: { stamina: +10, food: -5 }
+            effect: { stamina: 10, food: -5 }
           }
         ],
         knowledge: "年老暴龍常藉腐肉維生，但須小心地點與氣味會引來敵人。",
@@ -1304,18 +1307,18 @@
           {
             text: "待在原地埋伏，希望再次等到獵物",
             mpCost: 15,
-            effect: { food: +10, stamina: -5 },
+            effect: { food: 10, stamina: -5 },
             requirement: { sense: 16 }
           },
           {
             text: "往下游走去，碰碰運氣",
             mpCost: 10,
-            effect: { food: +5, stamina: -5 }
+            effect: { food: 5, stamina: -5 }
           },
           {
             text: "離開這裡，另尋水源",
             mpCost: 0,
-            effect: { stamina: +5, food: -5 }
+            effect: { stamina: 5, food: -5 }
           }
         ],
         knowledge: "老年暴龍可能依靠長年記憶尋找過去經驗中的獵點。",
@@ -1324,7 +1327,14 @@
       {
         id: "elder_005",
         title: "多年後，你的幼龍也長大了，牠獨自走進森林，留下你獨自守著曾經的領地。",
-        condition: stats => stats.child === true,
+        condition: stats => !!stats.child,
+        options: [
+          {
+            text: "繼續",
+            mpCost: 0,
+            effect: { }
+          }
+        ],
         knowledge: "許多動物會在幼年期結束後離開父母獨自生活。部分研究認為暴龍的幼體在成長過程中可能會逐步擁有自己的覓食領域。",
         oncePerStage: true
       }
@@ -1334,7 +1344,7 @@
       {
         id: "elderevent_001",
         triggerChance: 1.0, // ✅ 必定觸發
-        condition: stats => stats.sense >= 15, // 通過條件
+        condition: stats => stats.sense >= 25, // 通過條件
         requirementKey: "sense", // 畫面顯示的通關條件
 				requirementMin: 25, // 畫面顯示的通關條件
         deathCause: "感官退化",
@@ -1344,30 +1354,50 @@
       {
         id: "elderevent_002",
         triggerChance: 1.0, 
-        condition: stats => stats.food >= 80,
+        condition: stats => stats.food >= 90,
         requirementKey: "food",
-				requirementMin: 80,
+				requirementMin: 90,
         deathCause: "營養不足",
         text: "你已連續數日未獵食成功，身體開始感到異常虛弱。",
         oncePerStage: true
       },
       {
         id: "elderevent_003",
-        triggerChance: 0.7,
-        condition: stats => stats.intelligence >= 55,
+        triggerChance: 0.9,
+        condition: stats => stats.intelligence >= 35,
         requirementKey: "intelligence",
-				requirementMin: 30,
+				requirementMin: 35,
         deathCause: "應變不足",
         text: "突然下起大雨，地面變得泥濘，你必須立刻判斷撤離路線。",
         oncePerStage: true
       },
       {
         id: "elderevent_004",
-        triggerChance: 0.7,
+        triggerChance: 0.9,
         condition: stats => stats.weight >= 8500 && stats.length >= 12,
 				requirementText: "體重 ≥ 8500 公斤，且 體長 ≥ 12 公尺",
         deathCause: "體型不足",
         text: "你在一處水源地遇到另一隻成年暴龍，它慢慢逼近你。",
+        oncePerStage: true
+      },
+      {
+        id: "elderevent_005",
+        triggerChance: 0.9,
+        condition: stats => stats.independence >= 40,
+        requirementKey: "independence",
+        requirementMin: 40,
+        deathCause: "失去領地",
+        text: "你長年建立的領地已被年輕的暴龍覬覦。牠步步逼近，等待你露出破綻。",
+        oncePerStage: true
+      },
+      {
+        id: "elderevent_006",
+        triggerChance: 0.9,
+        condition: stats => stats.combat >= 50,
+        requirementKey: "combat",
+        requirementMin: 50,
+        deathCause: "威嚇力喪失",
+        text: "你的咆哮聲變得低沈無力，原本畏懼你的掠食者如今不再退讓。是時候一較高下了！",
         oncePerStage: true
       }
     ];
@@ -1472,11 +1502,13 @@
       document.getElementById("stage-screen").classList.remove("hidden");
       document.getElementById("stage-title").textContent = `階段：${stageData.name}`;
       document.getElementById("stage-description").textContent = stageData.description;
+      
     }
     
     // 隨機抽題＋隨機選項
-    function pickQuestionsFromPool(pool, count = 3) {
-      const shuffled = [...pool].sort(() => Math.random() - 0.5);
+    function pickQuestionsFromPool(pool, count) {
+      const filtered = pool.filter(q => !q.condition || q.condition(playerStats)); // 先過濾掉不符合條件的題目
+      const shuffled = [...filtered].sort(() => Math.random() - 0.5);
       return shuffled.slice(0, count);
     }
 
@@ -1598,6 +1630,7 @@
     // 產生能力增減文字
     function getEffectText(effect) {
       return Object.entries(effect)
+        .filter(([_, val]) => val !== 0) // ❗️只顯示有變化的項目
         .map(([key, val]) => `${translateStatKey(key)} ${val >= 0 ? "+" : ""}${val}`)
         .join("<br>");
     }
@@ -1605,8 +1638,12 @@
     // 實際修改玩家參數
     function applyEffect(effect) {
       for (const [key, val] of Object.entries(effect)) {
+        if (val === 0) continue;
         if (playerStats[key] !== undefined) {
           playerStats[key] += val;
+          if (playerStats[key] < 0) {
+            playerStats[key] = 0;
+          }
         }
       }
     }
@@ -1786,7 +1823,7 @@
         const conditionPassed = !event.condition || event.condition(playerStats);
         return shouldTrigger && conditionPassed && (!event.oncePerStage || !alreadyTriggered);
       });
-      
+
       for (const event of availableEvents) {
         if (Math.random() < event.triggerChance && event.condition(playerStats)) {
         	if (event.oncePerStage) {
@@ -1798,6 +1835,9 @@
             }
             pendingEvent = event;
             return true; // 一般隨機事件，之後會進入 showEventOnly
+          } else {
+            pendingEvent = event;
+            return true;
           }
         }
       }
@@ -1905,17 +1945,28 @@
                 document.getElementById("event-screen").classList.add("hidden");
                 showEndingByDeath(choice.deathCause);
               }
+
+
             } else {
               // 生還處理
-              pendingEvent = {
-              	...event,
-                text1: choice.successText || `你${choice.text}，成功存活下來。`,
-                effect: {}
-              };
+              if (pendingEvent.effect) { // no effect
+                pendingEvent = {
+                  ...event,
+                  text1: choice.successText || `你${choice.text}，成功存活下來。`,
+                  effect: {}
+                };
+              } else { // yes effect
+                pendingEvent = {
+                  ...event,
+                  text1: choice.successText || getEffectText(choice.effect) || `你${choice.text}，成功存活下來。` 
+                };
+                
+              }
+
               // 套用能力變動
               applyEffect(choice.effect || {});
-              
-              showStats(choice.effect)
+              showStats(choice.effect || {});
+
               continueAfterEvent_1();
             }
           };
@@ -1931,6 +1982,10 @@
     }
 
 		function continueAfterEvent_1(callback) {
+      // 立刻套用能力值
+      applyEffect(pendingEvent.effect || {});
+      showStats(pendingEvent.effect || {});
+
       const effectDiv = document.getElementById("event-effect");
       effectDiv.textContent = "";
       effectDiv.classList.remove("fade-in", "fade-out");
@@ -1957,8 +2012,6 @@
       effectDiv.innerHTML = baseText + valueHint;
       effectDiv.classList.remove("hidden");
       effectDiv.classList.add("fade-in");
-      // 立刻套用能力值
-      applyEffect(pendingEvent.effect || {});
 
       // 隱藏按鈕
       document.getElementById("event-continue-1").classList.add("hidden");
@@ -2152,10 +2205,10 @@
       document.getElementById("feedback-screen").classList.add("hidden");
 			if (currentStage !== 3) { // 防止老年題庫結束前觸發致死隨機事件
         const triggered = maybeTriggerRandomEvent();
-        if (triggered && pendingEvent.choices.length > 0) {
+        if (triggered && (pendingEvent.choices)) { /*pendingEvent.choices.length > 0) {*/
           showFatalEventWithChoices(pendingEvent);
           return;
-        } else if (triggered && !pendingEvent.choices.length > 0) {        	
+        } else if (triggered && !(pendingEvent.choices)) {        	
           showEventOnly(); // 👇 先顯示事件本身（暫不處理能力值變動）
           prepareContinueAfterEvent(null); // 不會做遞迴
           return;
@@ -2177,7 +2230,7 @@
       }
     }
     
-    function loadNextStage() {
+    function loadNextStage() {    
       currentStage++;
       if (currentStage < stageConfig.length) {
       	triggeredEventIds.clear(); // 清空上一階段的記錄
@@ -2199,7 +2252,6 @@
         document.getElementById("stage-screen").classList.remove("hidden");
         document.getElementById("stage-title").textContent = `階段：${stageData.name}`;
         document.getElementById("stage-description").textContent = stageData.description;
-
       }
     }
     
@@ -2278,7 +2330,17 @@
         一場泥濘中的掙扎，讓你成為其他生物的獵物。`),
         "體型不足": format(`你的體型無法威懾對手，最終被驅離。
         
-        孤獨地徘徊在荒野中，飢餓與疲憊讓你逐漸失去生機。`)
+        孤獨地徘徊在荒野中，飢餓與疲憊讓你逐漸失去生機。`),
+
+        "失去領地": format(`你努力守住領地，但隨著年齡增長，獨自維持壓倒性地位變得困難。
+        
+        年輕個體的挑戰終於成功，你被逐出熟悉的棲地，最終無聲死去。`),
+
+        "威嚇力喪失": format(`你曾是掠食者中的王者，如今卻難以震懾對手。
+        
+        對手不再懼怕，反倒主動出擊。
+        
+        在一場失衡的對決中，你結束了自己的統治。`)
       };
 
       document.getElementById("ending-text").innerHTML = endingText[cause] || "你未能活過老年階段。";
