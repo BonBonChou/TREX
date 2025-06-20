@@ -912,7 +912,7 @@
           {
             text: "衝上前怒吼驅趕對方",
             mpCost: 20,
-            effect: { food: -20, combat: 10, independence: 5 },
+            effect: { stamina: -10, combat: 10, independence: 5 },
             requirement: { combat: 40 }
           },
           {
@@ -923,7 +923,7 @@
           {
             text: "暫時撤退，等對方離開再回來",
             mpGain: 20,
-            effect: { food: -10, stamina: 10, independence: -15, combat: -10 }
+            effect: { food: -20, stamina: 10, independence: -15, combat: -10 }
           }
         ],
         knowledge: "壯年暴龍通常會劃定自己的領地，並主動驅趕同類入侵者。",
@@ -942,7 +942,7 @@
           {
             text: "觀察牠是否還有反擊能力",
             mpCost: 0,
-            effect: { food: -10, sense: 5 }
+            effect: { food: -10, sense: 5, intelligence: 5 }
           },
           {
             text: "避開牠，不涉入可能的爭鬥",
@@ -990,7 +990,7 @@
           {
             text: "潛伏等待牠們鬆懈再出手",
             mpCost: 10,
-            effect: { food: 10, combat: 5, stamina: -5 },
+            effect: { food: 10, combat: 5, stamina: -5, intelligence: 5 },
             requirement: { intelligence: 60 }
           },
           {
@@ -1014,7 +1014,7 @@
           {
             text: "觀察牠是否吸引其他掠食者",
             mpCost: 0,
-            effect: { sense: 5, independence: -5 }
+            effect: { sense: 5, independence: -5, intelligence: 5 }
           },
           {
             text: "不理會牠，繼續巡邏",
@@ -1038,7 +1038,7 @@
           {
             text: "判斷風向與氣味再行動",
             mpCost: 0,
-            effect: { food: -5, sense: 5 }
+            effect: { food: -5, sense: 5, intelligence: 10 }
           },
           {
             text: "選擇優先休息，恢復體力",
@@ -1093,7 +1093,7 @@
       {
         id: "adultevent_003",
         triggerChance: 0.2,
-        condition: stats => stats.stamina < 25,
+        condition: stats => stats.stamina > 35,
         text: "你在追擊一群小型恐龍時不慎摔落小坡，膝部擦傷行動受限。",
         effect: { stamina: -5, combat: -5 }
       },
@@ -1102,7 +1102,7 @@
         triggerChance: 0.3,
         condition: stats => stats.intelligence > 40,
         text: "你利用地形製造聲音假訊號，成功將其他掠食者引開後進食。",
-        effect: { food: 15, stamina: 10 }
+        effect: { food: 15, stamina: 10, intelligence: 10 }
       },
       {
         id: "adultevent_005",
@@ -1113,7 +1113,7 @@
       },
       {
         id: "adultevent_006",
-        triggerChance: 0.6,
+        triggerChance: 0.5,
         condition: () => true,
         text: "你注意到附近出現了一隻成熟異性暴龍，牠也發現了你，你會？",
         choices: [
