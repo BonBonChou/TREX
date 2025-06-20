@@ -1950,13 +1950,13 @@
               if (pendingEvent.effect) { // no effect
                 pendingEvent = {
                   ...event,
-                  text1: choice.successText || `你${choice.text}，成功存活下來。`,
+                  text1: choice.successText || `沒有能力變化`,
                   effect: {}
                 };
               } else { // yes effect
                 pendingEvent = {
                   ...event,
-                  text1: choice.successText || getEffectText(choice.effect) || `你${choice.text}，成功存活下來。` 
+                  text1: choice.successText || getEffectText(choice.effect) || `沒有能力變化` 
                 };
                 
               }
