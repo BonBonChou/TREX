@@ -1601,7 +1601,7 @@
             if (playerStats.mp > 100) playerStats.mp = 100;
 
             // 顯示統一的效果提示
-            effectTextDiv.innerHTML = getEffectText(opt.effect || {});
+            effectTextDiv.innerHTML = getEffectText(opt.effect || {}) || "沒有能力變化";
             effectTextDiv.classList.remove("hidden");
             effectTextDiv.classList.add("fade-in");
 
@@ -1991,7 +1991,7 @@
       effectDiv.classList.remove("fade-in", "fade-out");
       effectDiv.classList.add("hidden");
       // 通過致死隨機事件 || 一般隨機事件效果
-      const baseText = pendingEvent.text1 || getEffectText(pendingEvent.effect || {}) || "（沒有能力變化）";
+      const baseText = pendingEvent.text1 || getEffectText(pendingEvent.effect || {}) || "沒有能力變化";
 			
       let valueHint = "";
       if (pendingEvent.requirementKey) {
