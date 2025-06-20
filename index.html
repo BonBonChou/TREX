@@ -1964,6 +1964,7 @@
               // 套用能力變動
               applyEffect(choice.effect || {});
               showStats(choice.effect || {});
+              if (playerStats.mp > 100) playerStats.mp = 100;
 
               continueAfterEvent_1();
             }
@@ -1983,6 +1984,7 @@
       // 立刻套用能力值
       applyEffect(pendingEvent.effect || {});
       showStats(pendingEvent.effect || {});
+      if (playerStats.mp > 100) playerStats.mp = 100;
 
       const effectDiv = document.getElementById("event-effect");
       effectDiv.textContent = "";
