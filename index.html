@@ -1233,17 +1233,17 @@
             text: "花時間分析風向與氣味",
             mpCost: 0,
             effect: { sense: 5, food: 5, intelligence: 5 },
-            requirement: { intelligence: 40 }
+            requirement: { intelligence: 20 }
           },
           {
             text: "試著靠記憶判斷附近地形位置",
             mpCost: 0,
-            effect: { intelligence: -5, food: 5 }
+            effect: { intelligence: -5, food: 5, sense: 5 }
           },
           {
             text: "直接衝往一個方向碰碰運氣",
             mpCost: 10,
-            effect: { food: 10, intelligence: -10 },
+            effect: { food: 10, intelligence: -5 },
             requirement: { independence: 15 }
           }
         ],
