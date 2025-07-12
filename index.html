@@ -612,6 +612,7 @@
         id: "babyevent_001",
         triggerChance: 0.3, // 30% 機率觸發
         condition: () => true, 
+        oncePerStage: true,
         text: "你在睡夢中被蛇形生物驚醒，牠正悄悄爬向巢穴。",
         mpCost: 20,
         effect: { stamina: -5, sense: -5 }
@@ -620,6 +621,7 @@
         id: "babyevent_002",
         triggerChance: 0.4,
         condition: (stats) => stats.independence > 10, // 獨立性大於10有可能發生
+        oncePerStage: true,
         text: "你偷偷溜出巢穴，但在附近滑倒跌了一跤。",
         mpCost: 30,
         effect: { stamina: -10, independence: 5 }
@@ -628,6 +630,7 @@
         id: "babyevent_003",
         triggerChance: 0.5,
         condition: () => true,
+        oncePerStage: true,
         text: "母親帶回來一塊腐肉，你搶先吃到一口！",
         mpGain: 20,
         effect: { food: 10, stamina: 5 }
@@ -864,6 +867,7 @@
         id: "teenevent_001",
         triggerChance: 0.3, // 30% 機率觸發
         condition: () => true, // 觸發條件
+        oncePerStage: true,
         text: "你在森林中發現一具被啃咬過的大型恐龍屍體。",
         effect: { food: 20, stamina: 5, sense: 5 }
       },
@@ -871,12 +875,14 @@
         id: "teenevent_002",
         triggerChance: 0.3,
         condition: () => true,
+        oncePerStage: true,
         text: "你突然感到強烈飢餓，暴龍的高代謝讓你必須立刻進食。",
         effect: { food: -30, stamina: -5}
       },
       {
         id: "teenevent_003",
         triggerChance: 0.2,
+        oncePerStage: true,
         condition: () => true,
         text: "你在追逐獵物時踩到尖刺植物，腳掌受傷行動變慢。",
         effect: { stamina: -10, combat: -10 }
@@ -885,6 +891,7 @@
         id: "teenevent_004",
         triggerChance: 0.25,
         condition: stats => stats.combat > 15,
+        oncePerStage: true,
         text: "你過去的咬傷開始發炎感染，行動受到影響。",
         effect: { stamina: -20, independence: -5, sense: -5 }
       },
@@ -892,6 +899,7 @@
         id: "teenevent_005",
         triggerChance: 0.5,
         condition: stats => stats.intelligence > 35,
+        oncePerStage: true,
         text: "你偷偷從成年暴龍遺下的屍體中叼走一些肉塊。",
         effect: { food: 20, stamina: 10 }
       },
@@ -899,6 +907,7 @@
         id: "teenevent_006",
         triggerChance: 0.5,
         condition: stats => stats.sense > 15,
+        oncePerStage: true,
         text: "你用敏銳的嗅覺發現一個草食恐龍巢穴，趁虛而入。",
         effect: { food: 20, stamina: 10 }
       }
@@ -1080,6 +1089,7 @@
         id: "adultevent_001",
         triggerChance: 0.3,
         condition: stats => stats.sense > 20,
+        oncePerStage: true,
         text: "你在領地邊界發現其他暴龍留下的新鮮氣味，你本能地加強巡邏與防備。",
         effect: { stamina: 5, independence: 10 }
       },
@@ -1087,6 +1097,7 @@
         id: "adultevent_002",
         triggerChance: 0.3,
         condition: () => true,
+        oncePerStage: true,
         text: "你在夜間聽到獵物聲音，迅速行動並咬死一隻奔跑中的禽龍。",
         effect: { food: 20}
       },
@@ -1094,6 +1105,7 @@
         id: "adultevent_003",
         triggerChance: 0.2,
         condition: stats => stats.stamina > 35,
+        oncePerStage: true,
         text: "你在追擊一群小型恐龍時不慎摔落小坡，膝部擦傷行動受限。",
         effect: { stamina: -5, combat: -5 }
       },
@@ -1101,6 +1113,7 @@
         id: "adultevent_004",
         triggerChance: 0.3,
         condition: stats => stats.intelligence > 40,
+        oncePerStage: true,
         text: "你利用地形製造聲音假訊號，成功將其他掠食者引開後進食。",
         effect: { food: 15, stamina: 10, intelligence: 10 }
       },
@@ -1108,6 +1121,7 @@
         id: "adultevent_005",
         triggerChance: 0.3,
         condition: stats => stats.combat > 20,
+        oncePerStage: true,
         text: "你在與其他暴龍對峙後勝出，對方撤退，你的地位更加穩固。",
         effect: { independence: 10, combat: 5 }
       },
@@ -1187,7 +1201,7 @@
         choices: [
           {
             text: "攻擊安祖龍",
-            mpCost: 10,
+            mpCost: 0,
             successChance: 1,
             successText: "你輕鬆擊倒了安祖龍，補充了能量。",
             effect: { food: 10 }
